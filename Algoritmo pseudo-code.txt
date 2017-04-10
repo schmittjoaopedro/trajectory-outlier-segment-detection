@@ -16,7 +16,7 @@ Program:
 			if gridStart != gridEnd then
 				C <- GetCandidatesTrajectories(T, gridStart, gridEnd, TInt)
 				GT <- GetGroupTrajectories(C, d)
-				ST <- GetStandardTrajectorues(GT, k)
+				ST <- GetStandardTrajectories(GT, k)
 				NSST <- FindNotStandardTrajectories(GT, ST)
 			endif
 		endfor
@@ -26,7 +26,7 @@ Program:
 ================= CreateGrid =================
 # C1 deve estar do canto esquerdo abaixo e C2 no canto direito acima
 Variables:
-	L		<- grid tamanho da célula
+	L		<- quantidade de partições
 	C1		<- coordenada um
 	C2		<- coordenada dois
 	GRID    <- grid com mapeamentos
@@ -97,7 +97,7 @@ Program:
 		temp <- start
 		start <- end
 		end <- temp
-	end if
+	endif
 
 	if start < end then
 		subT <- t.split(start, end)
