@@ -1,0 +1,144 @@
+================= FindTrajectories =================
+Variables:
+	T 		<- conjunto de trajetórias
+	R 		<- grid de regiões
+	d 		<- distância de busca de vizinhos
+	TInt 	<- intervalo de tempo
+	K		<- número máximo de rotas padrões
+	C		<- candidatos
+	GT 		<- Grupo de trajetórias
+	ST 		<- trajetórias padrões agrupadas
+	NSST	<- segmentos de trajetórias não padrões agrupadas
+Program:
+	R <- CreateGrid()
+	foreach gridStart in R
+		foreach gridEnd in R
+			if gridStart != gridEnd then
+				C <- GetCandidatesTrajectories(T, gridStart, gridEnd, TInt)
+				GT <- GetGroupTrajectories(C, d)
+				ST <- GetStandardTrajectorues(GT, k)
+				NSST <- FindNotStandardTrajectories(GT, ST)
+			endif
+		endfor
+	endfor
+
+
+================= CreateGrid =================
+# C1 deve estar do canto esquerdo abaixo e C2 no canto direito acima
+Variables:
+	L		<- grid tamanho da célula
+	C1		<- coordenada um
+	C2		<- coordenada dois
+	GRID    <- grid com mapeamentos
+	W 		<- largura
+	H 		<- altura
+	Ladj	<- tamanho ajustado
+Program:
+	W <- (C1.x - C2.x) / L
+	H <- (C1.y - C2.y) / L
+	foreach w in L
+		foreach h in L
+			grid.xMin <- C1.x + (W * w)
+			grid.xMax <- C1.x + (W * (w + 1))
+			grid.yMin <- C1.y + (H * h)
+			grid.yMax <- C1.y + (H * (h + 1))
+			GRID.add(grid)
+		endfor
+	endfor
+	return GRID
+
+================= GetCandidatesTrajectories =================
+Variables:
+	T 			<- conjunto de trajetórias
+	gridStart 	<- região de partida
+	gridEnd		<- região de chegada
+	TInt		<- intervalo de tempo a ser considerado
+Program:
+	foreach t in T
+		subT <- GetSubTrajectory(t, gridStart, gridEnd)
+		if subT is not empty then
+			subsT.add(subT)
+		endif
+	endfor
+	return subsT
+
+
+================= GetSubTrajectory =================
+Variables:
+	t 	<- trajetória
+	gS 	<- região de partida
+	gE 	<- região de chegada
+Program:
+	start <- 0
+	end <- 0
+	subT
+	foreach p in t
+		if gS.xMin <= p.x <= gS.xMax and gS.yMin <= p.y <= gS.yMax then
+			start <- p
+			break
+		endif
+		if gE.xMin <= p.x <= gE.xMax and gE.yMin <= p.y <= gE.yMax then
+			end <- p
+			break
+		endif
+	endfor
+	foreach p in t inverse
+		if gS.xMin <= p.x <= gS.xMax and gS.yMin <= p.y <= gS.yMax then
+			start <- p
+			break
+		endif
+		if gE.xMin <= p.x <= gE.xMax and gE.yMin <= p.y <= gE.yMax then
+			end <- p
+			break
+		endif
+	endfor
+
+	if start > end then
+		temp <- start
+		start <- end
+		end <- temp
+	end if
+
+	if start < end then
+		subT <- t.split(start, end)
+		foreach p in subT
+			if  (gS.xMin <= p.x <= gS.xMax and gS.yMin <= p.y <= gS.yMax) or
+				(gE.xMin <= p.x <= gE.xMax and gE.yMin <= p.y <= gE.yMax) then
+				subT.remove(p)
+				break
+			endif	
+		endfor
+	endif
+		return empty
+
+
+================= GetGroupTrajectories =================
+Variables:
+	C		<- candidatos
+	G		<- grupos
+	d 		<- distância de busca de vizinhos
+Program:
+	foreach c in C
+		cG <- NULL
+		foreach pc in c
+			foreach g in G
+				foreach pg in g
+					if (((pc.x - pg.x)^2 + (pc.y - pg.y)^2)^(1/2)) <= d then
+						cG <- g
+					else
+						cG <- NULL
+						break;
+					endif
+				endfor
+			endfor
+		endfor
+		if cG is not null then
+			cG.addTrajectory(c)
+			c.setGroup(cG)
+		else then
+			G.addGroup(gN)
+			gN.addTrajectory(c)
+			c.setGroup(gN)
+		endif
+	endfor
+	return G
