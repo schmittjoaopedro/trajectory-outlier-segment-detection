@@ -3,7 +3,8 @@ Variables:
 	T 		<- conjunto de trajetórias
 	R 		<- grid de regiões
 	d 		<- distância de busca de vizinhos
-	TInt 	<- intervalo de tempo
+	tSt 	<- intervalo de tempo de inicio
+	tEn 	<- intervalo de tempo de fim
 	K		<- número máximo de rotas padrões
 	C		<- candidatos
 	GT 		<- Grupo de trajetórias
@@ -14,10 +15,10 @@ Program:
 	foreach gridStart in R
 		foreach gridEnd in R
 			if gridStart != gridEnd then
-				C <- GetCandidatesTrajectories(T, gridStart, gridEnd, TInt)
+				C <- GetCandidatesTrajectories(T, gridStart, gridEnd, tSt, tEn)
 				GT <- GetGroupTrajectories(C, d)
 				ST <- GetStandardTrajectories(GT, k)
-				NSST <- FindNotStandardTrajectories(GT, ST)
+				NSST <- FindNotStandardTrajectories(GT, ST, d)
 			endif
 		endfor
 	endfor
@@ -34,8 +35,8 @@ Variables:
 	H 		<- altura
 	Ladj	<- tamanho ajustado
 Program:
-	W <- (C1.x - C2.x) / L
-	H <- (C1.y - C2.y) / L
+	W <- (C2.x - C1.x) / L
+	H <- (C2.y - C1.y) / L
 	foreach w in L
 		foreach h in L
 			grid.xMin <- C1.x + (W * w)
@@ -52,12 +53,15 @@ Variables:
 	T 			<- conjunto de trajetórias
 	gridStart 	<- região de partida
 	gridEnd		<- região de chegada
-	TInt		<- intervalo de tempo a ser considerado
+	tSt 	<- intervalo de tempo de inicio
+	tEn 	<- intervalo de tempo de fim
 Program:
 	foreach t in T
 		subT <- GetSubTrajectory(t, gridStart, gridEnd)
-		if subT is not empty then
-			subsT.add(subT)
+		if subT is not empty and
+		   subT.points[0].time >= tSt and
+		   subT.points[subT.points].time <= tEn then
+				subsT.add(subT)
 		endif
 	endfor
 	return subsT
@@ -134,11 +138,71 @@ Program:
 		endfor
 		if cG is not null then
 			cG.addTrajectory(c)
-			c.setGroup(cG)
 		else then
 			G.addGroup(gN)
 			gN.addTrajectory(c)
-			c.setGroup(gN)
 		endif
 	endfor
 	return G
+
+
+================= GetStandardTrajectories =================
+Variables:
+	GT 		<- Grupo de trajetórias
+	K		<- número máximo de rotas padrões
+Program:
+	GT.sortDesc();
+	foreach i in K
+		ST.add(GT[i])
+	endfor
+	return ST
+
+================= FindNotStandardTrajectories =================
+Variables:
+	GT 		<- Grupo de trajetórias
+	ST 		<- Trajetórias padrões agrupadas
+	d 		<- distância de busca de vizinhos
+Program:
+	foreach g in GT
+		if !ST.contains(g) then
+			NST.add(g)
+		endinf
+	endfor
+	foreach ns in NST
+		FindNotStandardTrajectoriesSegments(ns, GT, d)
+	endfor
+
+================= FindNotStandardTrajectoriesSegments =================
+Variables:
+	ns 		<- not standard trajectory
+	GT 		<- standard trajectory group
+	d 		<- distância de busca de vizinhos
+Program:
+	
+	isStd = FALSE
+	lastStd = FALSE
+
+	foreach pns in ns
+		isStd == FALSE
+		foreach G in GT
+			foreach pg in G
+				if (((pns.x - pg.x)^2 + (pns.y - pg.y)^2)^(1/2)) <= d then
+					isStd <- TRUE
+					break
+				endif
+			endfor
+		endfor
+		segment.add(pns)
+		if lastStd != isStd then
+			if isStd == TRUE then
+				stds.add(segment)
+			else
+				notStds.add(segment)
+			endif
+			lastStd = isStd
+			segment.clear()
+		endif
+	endfor
+	routes.standards = stds
+	routes.notStandards = notStds
+	return routes
