@@ -1,6 +1,8 @@
 package org.udesc.trajectory_outlier_detection;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -10,10 +12,10 @@ import java.util.List;
 public class App {
 	
 	//To be configured
-	double distance = 0.0;
+	double distance = 0.0003;
 	double timeStart = 0.0;
 	double timeEnd = 24.0;
-	double stdQtde = 1;
+	int stdQtde = 1;
 	
 	double latSt = -26.370924;
 	double latEn = -26.237597;
@@ -40,16 +42,17 @@ public class App {
     	trajectories = database.getTrajectories();
     	regions = this.createGrid();
     	
-    	long time = System.currentTimeMillis();
-    	
     	for(int i = 0; i < regions.size(); i++) {
     		for(int j = i + 1; j < regions.size(); j++) {
     			candidates = this.getCandidatesTrajectories(trajectories, regions.get(i), regions.get(j), timeStart, timeEnd);
-    			System.out.println("Region[" + i + "," + j + "] = " + candidates.size());
+    			if(!candidates.isEmpty()) {
+    				List<Group> groups = this.getGroupTrajectories(candidates, distance);
+    				if(!groups.isEmpty()) {
+    					List<Group> standard = this.getStandardTrajectories(groups, stdQtde);
+    				}
+    			}
         	}
     	}
-    	
-    	System.out.println(System.currentTimeMillis() - time);
     }
     
     public List<Grid> createGrid() {
@@ -130,6 +133,46 @@ public class App {
     		return null;
     	} 
     	return subT;
+    }
+   
+    public List<Group> getGroupTrajectories(List<Trajectory> candidates, double d) {
+    	List<Group> groups = new ArrayList<Group>();
+    	for(Trajectory candidate : candidates) {
+    		Group currentGroup = null;
+    		for(Group g : groups) {
+    			for(Point pc : candidate.getPoints()) {
+    				for(Trajectory tg : g.getTrajectories()) {
+    					for(Point pg : tg.getPoints()) {
+    						if(Math.sqrt(Math.pow(pg.getLat() - pc.getLat(), 2) + Math.pow(pg.getLng() - pc.getLng(), 2)) <= d) {
+    							currentGroup = g;
+    							break;
+    						} else {
+    							currentGroup = null;
+    						}
+    					}
+    					if(currentGroup == null) break;
+    				}
+    			}
+    			if(currentGroup != null) break;
+    		}
+    		if(currentGroup != null) {
+    			currentGroup.getTrajectories().add(candidate);
+    		} else {
+    			Group group = new Group();
+    			group.getTrajectories().add(candidate);
+    			groups.add(group);
+    		}
+    	}
+    	return groups;
+    }
+    
+    public List<Group> getStandardTrajectories(List<Group> groups, int k) {
+    	Collections.sort(groups, new Comparator<Group>() {
+			public int compare(Group o1, Group o2) {
+				return (int) (o1.getTrajectories().size() - o2.getTrajectories().size());
+			}
+		});
+    	return groups.subList(0, k);
     }
     
 }
