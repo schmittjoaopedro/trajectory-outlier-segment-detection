@@ -53,4 +53,12 @@ public class Grid implements Serializable {
 		this.lngMax = lngMax;
 	}
 	
+	public boolean betweenLat(Point p) {
+		return this.getLatMin() <= p.getLat() && p.getLat() <= this.getLatMax();
+	}
+	
+	public boolean betweenLng(Point p) {
+		return this.getLngMin() <= p.getLng() && p.getLng() <= this.getLngMax();
+	}
+	
 }

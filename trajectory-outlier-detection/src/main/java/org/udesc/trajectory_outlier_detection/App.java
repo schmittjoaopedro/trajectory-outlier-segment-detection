@@ -39,15 +39,17 @@ public class App {
     	database.initialize();
     	trajectories = database.getTrajectories();
     	regions = this.createGrid();
-    	int count = 0;
-    	for(Grid gridStart : regions) {
-    		for(Grid gridEnd : regions) {
-        		if(gridStart != gridEnd) {
-        			candidates = this.getCandidatesTrajectories(trajectories, gridStart, gridEnd, timeStart, timeEnd);
-        			System.out.println("Region[" + count++ + "] = " + candidates.size());
-        		}
+    	
+    	long time = System.currentTimeMillis();
+    	
+    	for(int i = 0; i < regions.size(); i++) {
+    		for(int j = i + 1; j < regions.size(); j++) {
+    			candidates = this.getCandidatesTrajectories(trajectories, regions.get(i), regions.get(j), timeStart, timeEnd);
+    			System.out.println("Region[" + i + "," + j + "] = " + candidates.size());
         	}
     	}
+    	
+    	System.out.println(System.currentTimeMillis() - time);
     }
     
     public List<Grid> createGrid() {
@@ -72,8 +74,8 @@ public class App {
     	for(Trajectory trajectory : trajectories) {
     		Trajectory subTrajectory = this.getSubTrajectory(trajectory, gridStart, gridEnd);
     		if(subTrajectory != null && !subTrajectory.getPoints().isEmpty() && 
-    				subTrajectory.getPoints().get(0).getHour() >= tStart &&
-    				subTrajectory.getPoints().get(subTrajectory.getPoints().size() - 1).getHour() >= tEnd) {
+    				tStart <= subTrajectory.getPoints().get(0).getHour() &&
+    				subTrajectory.getPoints().get(subTrajectory.getPoints().size() - 1).getHour() <= tEnd) {
     			subTrajectories.add(subTrajectory);
     		}
     	}
@@ -81,19 +83,17 @@ public class App {
     }
     
     public Trajectory getSubTrajectory(Trajectory trajectory, Grid gS, Grid gE) {
-    	
     	boolean found = false;
     	int start = 0;
     	int end = 0;
     	Trajectory subT = new Trajectory();
     	subT.setName(trajectory.getName());
-    	
     	for(Point p : trajectory.getPoints()) {
-    		if (gS.getLatMin() <= p.getLat() && p.getLat() <= gS.getLatMax() && gS.getLngMin() <= p.getLng() && p.getLng() <= gS.getLngMax()) {
+    		if (gS.betweenLat(p) && gS.betweenLng(p)) {
     			start = trajectory.getPoints().indexOf(p);
     			found = true;
     			break;
-    		} else if (gE.getLatMin() <= p.getLat() && p.getLat() <= gE.getLatMax() && gE.getLngMin() <= p.getLng() && p.getLng() <= gE.getLngMax()) {
+    		} else if (gE.betweenLat(p) && gE.betweenLng(p)) {
     			end = trajectory.getPoints().indexOf(p);
     			found = true;
     			break;
@@ -103,35 +103,32 @@ public class App {
 	    	Point p = null;
 	    	for(int i = trajectory.getPoints().size() - 1; i >= 0; i--) {
 	    		p = trajectory.getPoints().get(i);
-	    		if (gS.getLatMin() <= p.getLat() && p.getLat() <= gS.getLatMax() && gS.getLngMin() <= p.getLng() && p.getLng() <= gS.getLngMax()) {
+	    		if (gS.betweenLat(p) && gS.betweenLng(p) && start == 0) {
 	    			start = i;
 	    			break;
-	    		} else if (gE.getLatMin() <= p.getLat() && p.getLat() <= gE.getLatMax() && gE.getLngMin() <= p.getLng() && p.getLng() <= gE.getLngMax()) {
+	    		} else if (gE.betweenLat(p) && gE.betweenLng(p) && end == 0) {
 	    			end = i;
 	    			break;
 	    		}
 	    	}
     	}
-
     	if (start > end) {
     		int temp = start;
     		start = end;
     		end = temp;
     	}
-
     	if (start < end) {
     		List<Point> points = trajectory.getPoints().subList(start, end);
     		subT.getPoints().addAll(points);
     		for(Point p : points) {
-    			if  ((gS.getLatMin() <= p.getLat() && p.getLat() <= gS.getLatMax() && gS.getLngMin() <= p.getLng() && p.getLng() <= gS.getLngMax()) ||
-    				(gE.getLatMin() <= p.getLat() && p.getLat() <= gE.getLatMax() && gE.getLngMin() <= p.getLng() && p.getLng() <= gE.getLngMax())) {
+    			if  ((gS.betweenLat(p) && gS.betweenLng(p)) ||
+    				(gE.betweenLat(p) && gE.betweenLng(p))) {
     				subT.getPoints().remove(p);
-    			}	
+    			}
     		}
     	} else {
     		return null;
     	} 
-    	
     	return subT;
     }
     
