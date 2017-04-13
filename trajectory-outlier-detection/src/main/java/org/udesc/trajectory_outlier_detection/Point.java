@@ -72,4 +72,8 @@ public class Point implements Serializable {
 		this.timestamp = timestamp;
 	}
 	
+	public double calculateDistance(Point p) {
+		return Math.sqrt(Math.pow(this.getLat() - p.getLat(), 2) + Math.pow(this.getLng() - p.getLng(), 2));
+	}
+	
 }

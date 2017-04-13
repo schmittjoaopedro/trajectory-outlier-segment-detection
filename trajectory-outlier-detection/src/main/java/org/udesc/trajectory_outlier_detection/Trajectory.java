@@ -36,4 +36,30 @@ public class Trajectory implements Serializable {
 		this.points = points;
 	}
 	
+	public String toStringDefault() {
+		String STstr = "drawPoints([";
+		for(int i = 0; i < this.getPoints().size(); i++) {
+			if(i < this.getPoints().size() - 1) {
+				STstr += "{lat: " + this.getPoints().get(i).getLat() + ",lng:" + this.getPoints().get(i).getLng() + "},";
+			} else {
+				STstr += "{lat: " + this.getPoints().get(i).getLat() + ",lng:" + this.getPoints().get(i).getLng() + "}";
+			}
+		}
+		STstr += "], '#FF0000');";
+		return STstr;
+	}
+	
+	public String toStringOutlier() {
+		String STstr = "drawPoints([";
+		for(int i = 0; i < this.getPoints().size(); i++) {
+			if(i < this.getPoints().size() - 1) {
+				STstr += "{lat: " + this.getPoints().get(i).getLat() + ",lng:" + this.getPoints().get(i).getLng() + "},";
+			} else {
+				STstr += "{lat: " + this.getPoints().get(i).getLat() + ",lng:" + this.getPoints().get(i).getLng() + "}";
+			}
+		}
+		STstr += "], '#0000FF');";
+		return STstr;
+	}
+	
 }

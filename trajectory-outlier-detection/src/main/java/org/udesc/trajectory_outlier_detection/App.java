@@ -1,9 +1,12 @@
 package org.udesc.trajectory_outlier_detection;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
 
 /**
  * Hello world!
@@ -22,6 +25,7 @@ public class App {
 	double lngSt = -48.944078;
 	double lngEn = -48.775826;
 	double L = 30.0;
+	String outputFolder = "/home/joao/Área de Trabalho/Mestrado/trajectory-outlier-segment-detection/maps/output";
 	
 	//References
 	List<Trajectory> trajectories;
@@ -33,27 +37,47 @@ public class App {
 	
 	Database database = new Database("/home/joao/Área de Trabalho/Mestrado/Extracted/tidy/LGE Nexus 4");
 	
-    public static void main( String[] args ) {
+    public static void main( String[] args ) throws Exception {
     	new App().run();
     }
     
-    public void run() {
+    public void run() throws Exception {
     	database.initialize();
     	trajectories = database.getTrajectories();
     	regions = this.createGrid();
     	
+    	long start = System.currentTimeMillis();
     	for(int i = 0; i < regions.size(); i++) {
     		for(int j = i + 1; j < regions.size(); j++) {
-    			candidates = this.getCandidatesTrajectories(trajectories, regions.get(i), regions.get(j), timeStart, timeEnd);
-    			if(!candidates.isEmpty()) {
-    				List<Group> groups = this.getGroupTrajectories(candidates, distance);
-    				if(!groups.isEmpty()) {
-    					List<Group> standard = this.getStandardTrajectories(groups, stdQtde);
-    				}
-    			}
+    			calculateRegions(i, j);
         	}
+    		System.out.println(i);
     	}
+//    	calculateRegions(312, 341);
+    	System.out.println("End in: " + (System.currentTimeMillis() - start));
     }
+
+	private void calculateRegions(int i, int j) throws Exception {
+		candidates = this.getCandidatesTrajectories(trajectories, regions.get(i), regions.get(j), timeStart, timeEnd);
+		if(!candidates.isEmpty()) {
+			List<Group> groups = this.getGroupTrajectories(candidates, distance);
+			if(!groups.isEmpty()) {
+				List<Group> standard = this.getStandardTrajectories(groups, stdQtde);
+				if(!standard.isEmpty()) {
+					List<Route> routes = this.getNotStandardTrajectories(groups, standard, distance);
+					boolean hasOutlier = false;
+					for(Route r : routes) {
+						if(!r.getNotStandards().isEmpty()) {
+							hasOutlier = true;
+							break;
+						}
+					}
+					if(hasOutlier)
+						printData(regions.get(i), regions.get(j), standard, routes, i, j);
+				}
+			}
+		}
+	}
     
     public List<Grid> createGrid() {
     	List<Grid> grids = new ArrayList<Grid>();
@@ -86,41 +110,29 @@ public class App {
     }
     
     public Trajectory getSubTrajectory(Trajectory trajectory, Grid gS, Grid gE) {
-    	boolean found = false;
-    	int start = 0;
-    	int end = 0;
+    	int start = -1;
+    	int end = -1;
+    	double distance = -1;
+    	
     	Trajectory subT = new Trajectory();
     	subT.setName(trajectory.getName());
-    	for(Point p : trajectory.getPoints()) {
-    		if (gS.betweenLat(p) && gS.betweenLng(p)) {
-    			start = trajectory.getPoints().indexOf(p);
-    			found = true;
-    			break;
-    		} else if (gE.betweenLat(p) && gE.betweenLng(p)) {
-    			end = trajectory.getPoints().indexOf(p);
-    			found = true;
-    			break;
+    	
+    	for(int i = 0; i < trajectory.getPoints().size(); i++) {
+    		Point pS = trajectory.getPoints().get(i);
+    		if (gS.betweenLat(pS) && gS.betweenLng(pS)) {
+    			for(int j = i + 1; j < trajectory.getPoints().size(); j++) {
+    				Point pE = trajectory.getPoints().get(j);
+        			if(pE != pS && gE.betweenLat(pE) && gE.betweenLng(pE)) {
+        				if(pE.calculateDistance(pS) <= distance || distance == -1) {
+        					start = i;
+        					end = j;
+        					distance = pE.calculateDistance(pS);
+        				}
+        			}
+        		}
     		}
     	}
-    	if(found) {
-	    	Point p = null;
-	    	for(int i = trajectory.getPoints().size() - 1; i >= 0; i--) {
-	    		p = trajectory.getPoints().get(i);
-	    		if (gS.betweenLat(p) && gS.betweenLng(p) && start == 0) {
-	    			start = i;
-	    			break;
-	    		} else if (gE.betweenLat(p) && gE.betweenLng(p) && end == 0) {
-	    			end = i;
-	    			break;
-	    		}
-	    	}
-    	}
-    	if (start > end) {
-    		int temp = start;
-    		start = end;
-    		end = temp;
-    	}
-    	if (start < end) {
+    	if (start < end && start != -1 && end != -1) {
     		List<Point> points = trajectory.getPoints().subList(start, end);
     		subT.getPoints().addAll(points);
     		for(Point p : points) {
@@ -143,7 +155,7 @@ public class App {
     			for(Point pc : candidate.getPoints()) {
     				for(Trajectory tg : g.getTrajectories()) {
     					for(Point pg : tg.getPoints()) {
-    						if(Math.sqrt(Math.pow(pg.getLat() - pc.getLat(), 2) + Math.pow(pg.getLng() - pc.getLng(), 2)) <= d) {
+    						if(pg.calculateDistance(pc) <= d) {
     							currentGroup = g;
     							break;
     						} else {
@@ -169,10 +181,108 @@ public class App {
     public List<Group> getStandardTrajectories(List<Group> groups, int k) {
     	Collections.sort(groups, new Comparator<Group>() {
 			public int compare(Group o1, Group o2) {
-				return (int) (o1.getTrajectories().size() - o2.getTrajectories().size());
+				return (int) (o2.getTrajectories().size() - o1.getTrajectories().size());
 			}
 		});
     	return groups.subList(0, k);
     }
+    
+    public List<Route> getNotStandardTrajectories(List<Group> GT, List<Group> STG, double d) {
+    	List<Group> NSG = new ArrayList<Group>();
+    	List<Route> routes = new ArrayList<Route>();
+    	for(Group g : GT) {
+    		if(!STG.contains(g)) {
+    			NSG.add(g);
+    		}
+    	}
+    	for(Group ns : NSG) {
+    		for(Trajectory t : ns.getTrajectories()) {
+    			Route route = this.getNotStandardTrajectoriesSegments(t, STG, d);
+    			if(route != null) {
+    				routes.add(route);
+    			}
+    		}
+    	}
+    	return routes;
+    }
+    
+    public Route getNotStandardTrajectoriesSegments(Trajectory ns, List<Group> GT, double distance) {
+    	Route route = new Route();
+    	
+    	boolean isStd = false;
+    	Boolean lastStd = null;
+    	
+    	List<Point> segment = new ArrayList<Point>();
+    	for(Point p : ns.getPoints()) {
+    		isStd = false;
+    		for(Group g : GT) {
+    			for(Trajectory st : g.getTrajectories()) {
+    				for(Point ps : st.getPoints()) {
+    					if(ps.calculateDistance(p) <= distance) {
+    						isStd = true;
+    						break;
+    					}
+    				}
+    				if(isStd == true) break;
+    			}
+    			if(isStd == true) break;
+    		}
+    		if((lastStd == null || lastStd != isStd) && segment.size() > 1) {
+    			if(lastStd != null) {
+    				Trajectory t = new Trajectory();
+    				t.setPoints(segment);
+    				if(lastStd)
+    					route.getStandards().add(t);
+    				else
+    					route.getNotStandards().add(t);
+        			segment = new ArrayList<Point>();
+    			}
+    			lastStd = isStd;
+    		}
+    		segment.add(p);
+    	}
+    	if(lastStd != null) {
+			Trajectory t = new Trajectory();
+			t.setPoints(segment);
+			if(lastStd)
+				route.getStandards().add(t);
+			else
+				route.getNotStandards().add(t);
+		}
+    	return route;
+    }
+    
+    public void printData(Grid SR, Grid ER, List<Group> ST, List<Route> NST, int i, int j) throws Exception {
+    	
+    	String file = outputFolder + "/_" + i + "_" + j + ".txt";
+    	StringBuilder data = new StringBuilder();
+    	
+    	data.append("Regions\n");
+    	data.append(SR.toStringStart() + "\n");
+    	data.append(ER.toStringEnd() + "\n");
+    	
+    	data.append("Default full trajectories\n");
+    	for(Group g : ST) {
+    		for(Trajectory t : g.getTrajectories()) {
+    			data.append(t.toStringDefault() + "\n");
+    		}
+    	}
+    	data.append("Default segment trajectories\n");
+    	for(Route r : NST) {
+    		for(Trajectory ts : r.getStandards()) {
+    			data.append(ts.toStringDefault() + "\n");
+    		}
+    	}
+    	data.append("Outelier segment trajectories\n");
+    	for(Route r : NST) {
+    		for(Trajectory nts : r.getNotStandards()) {
+    			data.append(nts.toStringOutlier() + "\n");
+    		}
+    	}
+    	FileUtils.write(new File(file), data.toString(), "UTF-8");
+//    	System.out.println(data.toString());
+    	
+    }
+    
     
 }

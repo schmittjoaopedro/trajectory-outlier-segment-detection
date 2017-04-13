@@ -61,4 +61,24 @@ public class Grid implements Serializable {
 		return this.getLngMin() <= p.getLng() && p.getLng() <= this.getLngMax();
 	}
 	
+	public String toStringStart() {
+		String thisstr = "drawPoints(["
+    			+ "{lat: " + this.getLatMin() + ",lng:" + this.getLngMin() + "},"
+    			+ "{lat: " + this.getLatMin() + ",lng:" + this.getLngMax() + "},"
+    			+ "{lat: " + this.getLatMax() + ",lng:" + this.getLngMax() + "},"
+    			+ "{lat: " + this.getLatMax() + ",lng:" + this.getLngMin() + "},"
+    			+ "{lat: " + this.getLatMin() + ",lng:" + this.getLngMin() + "}], '#FFFFFF');";
+		return thisstr;
+	}
+	
+	public String toStringEnd() {
+		String thisstr = "drawPoints(["
+    			+ "{lat: " + this.getLatMin() + ",lng:" + this.getLngMin() + "},"
+    			+ "{lat: " + this.getLatMin() + ",lng:" + this.getLngMax() + "},"
+    			+ "{lat: " + this.getLatMax() + ",lng:" + this.getLngMax() + "},"
+    			+ "{lat: " + this.getLatMax() + ",lng:" + this.getLngMin() + "},"
+    			+ "{lat: " + this.getLatMin() + ",lng:" + this.getLngMin() + "}], '#000000');";
+		return thisstr;
+	}
+	
 }
