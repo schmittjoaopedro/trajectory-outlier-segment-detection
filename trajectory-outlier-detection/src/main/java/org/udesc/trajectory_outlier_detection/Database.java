@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class Database {
@@ -45,11 +43,7 @@ public class Database {
 								Long.valueOf(lineS[17])));
 					}
 				}
-				Collections.sort(trajectory.getPoints(), new Comparator<Point>() {
-					public int compare(Point o1, Point o2) {
-						return (int) (o1.getTimestamp() - o2.getTimestamp());
-					}
-				});
+				trajectory.initialize();
 				if (trajectory.getPoints().size() > 1) {
 					this.trajectories.add(trajectory);
 				}

@@ -144,6 +144,7 @@ public class App {
     	} else {
     		return null;
     	} 
+    	subT.initialize();
     	return subT;
     }
    
@@ -153,17 +154,14 @@ public class App {
     		Group currentGroup = null;
     		for(Group g : groups) {
     			for(Point pc : candidate.getPoints()) {
+    				currentGroup = null;
     				for(Trajectory tg : g.getTrajectories()) {
-    					for(Point pg : tg.getPoints()) {
-    						if(pg.calculateDistance(pc) <= d) {
-    							currentGroup = g;
-    							break;
-    						} else {
-    							currentGroup = null;
-    						}
+    					if(tg.binarySearch(pc, d)) {
+							currentGroup = g;
+							break;
     					}
-    					if(currentGroup == null) break;
     				}
+    				if(currentGroup == null) break;
     			}
     			if(currentGroup != null) break;
     		}
@@ -217,11 +215,9 @@ public class App {
     		isStd = false;
     		for(Group g : GT) {
     			for(Trajectory st : g.getTrajectories()) {
-    				for(Point ps : st.getPoints()) {
-    					if(ps.calculateDistance(p) <= distance) {
-    						isStd = true;
-    						break;
-    					}
+    				if(st.binarySearch(p, distance)) {
+						isStd = true;
+						break;
     				}
     				if(isStd == true) break;
     			}
@@ -231,6 +227,7 @@ public class App {
     			if(lastStd != null) {
     				Trajectory t = new Trajectory();
     				t.setPoints(segment);
+    				t.initialize();
     				if(lastStd)
     					route.getStandards().add(t);
     				else
@@ -244,6 +241,7 @@ public class App {
     	if(lastStd != null) {
 			Trajectory t = new Trajectory();
 			t.setPoints(segment);
+			t.initialize();
 			if(lastStd)
 				route.getStandards().add(t);
 			else
