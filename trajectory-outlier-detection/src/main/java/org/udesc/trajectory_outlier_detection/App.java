@@ -35,7 +35,7 @@ public class App {
 	List<Group> standardTrajectoriesGroup = new ArrayList<Group>();
 	List<Group> notStandardTrajectoriesGroup = new ArrayList<Group>();
 	
-	Database database = new Database("/home/joao/Área de Trabalho/Mestrado/Extracted/tidy/LGE Nexus 4");
+	Database database = new Database("/home/joao/Área de Trabalho/Mestrado/Extracted/tidy/ALL");
 	
     public static void main( String[] args ) throws Exception {
     	new App().run();
@@ -47,13 +47,15 @@ public class App {
     	regions = this.createGrid();
     	
     	long start = System.currentTimeMillis();
-    	for(int i = 0; i < regions.size(); i++) {
-    		for(int j = i + 1; j < regions.size(); j++) {
-    			calculateRegions(i, j);
-        	}
-    		System.out.println(i);
-    	}
-//    	calculateRegions(312, 341);
+//    	for(int i = 0; i < regions.size(); i++) {
+//    		for(int j = i + 1; j < regions.size(); j++) {
+//    			calculateRegions(i, j);
+//        	}
+//    		System.out.println(i);
+//    	}
+    	
+    	calculateRegions(195, 284);
+    	
     	System.out.println("End in: " + (System.currentTimeMillis() - start));
     }
 
@@ -255,23 +257,23 @@ public class App {
     	String file = outputFolder + "/_" + i + "_" + j + ".txt";
     	StringBuilder data = new StringBuilder();
     	
-    	data.append("Regions\n");
+    	data.append("//Regions\n");
     	data.append(SR.toStringStart() + "\n");
     	data.append(ER.toStringEnd() + "\n");
     	
-    	data.append("Default full trajectories\n");
+    	data.append("//Default full trajectories\n");
     	for(Group g : ST) {
     		for(Trajectory t : g.getTrajectories()) {
     			data.append(t.toStringDefault() + "\n");
     		}
     	}
-    	data.append("Default segment trajectories\n");
+    	data.append("//Default segment trajectories\n");
     	for(Route r : NST) {
     		for(Trajectory ts : r.getStandards()) {
     			data.append(ts.toStringDefault() + "\n");
     		}
     	}
-    	data.append("Outelier segment trajectories\n");
+    	data.append("//Outlier segment trajectories\n");
     	for(Route r : NST) {
     		for(Trajectory nts : r.getNotStandards()) {
     			data.append(nts.toStringOutlier() + "\n");

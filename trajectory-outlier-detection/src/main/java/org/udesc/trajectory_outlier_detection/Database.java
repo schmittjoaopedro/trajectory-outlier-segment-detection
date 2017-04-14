@@ -23,33 +23,37 @@ public class Database {
 			File f = new File(path);
 			ArrayList<String> names = new ArrayList<String>(Arrays.asList(f.list()));
 			for (int i = 0; i < names.size(); i++) {
-				Trajectory trajectory = new Trajectory();
-				trajectory.setName(names.get(i));
-				File file = new File(path + "/" + names.get(i));
-				FileReader fileReader = new FileReader(file);
-				BufferedReader bufferedReader = new BufferedReader(fileReader);
-				String line;
-				boolean fileHeaderProcessed = false;
-				while ((line = bufferedReader.readLine()) != null) {
-					if (!fileHeaderProcessed && line.length() > 0) {
-						fileHeaderProcessed = true;
-					} else if (fileHeaderProcessed && line.length() > 0) {
-						String[] lineS = line.split(";");
-						trajectory.getPoints().add(new Point(
-								Integer.valueOf(lineS[13]),
-								Integer.valueOf(lineS[14]), 
-								Double.valueOf(lineS[3]),
-								Double.valueOf(lineS[4]),
-								Long.valueOf(lineS[17])));
+				try {
+					Trajectory trajectory = new Trajectory();
+					trajectory.setName(names.get(i));
+					File file = new File(path + "/" + names.get(i));
+					FileReader fileReader = new FileReader(file);
+					BufferedReader bufferedReader = new BufferedReader(fileReader);
+					String line;
+					boolean fileHeaderProcessed = false;
+					while ((line = bufferedReader.readLine()) != null) {
+						if (!fileHeaderProcessed && line.length() > 0) {
+							fileHeaderProcessed = true;
+						} else if (fileHeaderProcessed && line.length() > 0) {
+							String[] lineS = line.split(";");
+							trajectory.getPoints().add(new Point(
+									Integer.valueOf(lineS[13]),
+									Integer.valueOf(lineS[14]), 
+									Double.valueOf(lineS[3]),
+									Double.valueOf(lineS[4]),
+									Long.valueOf(lineS[17])));
+						}
 					}
-				}
-				trajectory.initialize();
-				if (trajectory.getPoints().size() > 1) {
-					this.trajectories.add(trajectory);
-				}
-				bufferedReader.close();
-				if(i % 10 == 0) {
-					System.out.println("Load: " + i + " from: " + names.size());
+					trajectory.initialize();
+					if (trajectory.getPoints().size() > 1) {
+						this.trajectories.add(trajectory);
+					}
+					bufferedReader.close();
+					if(i % 10 == 0) {
+						System.out.println("Load: " + i + " from: " + names.size());
+					}
+				} catch (Exception e) {
+					//e.printStackTrace();
 				}
 			}
 		} catch (Exception e) {
