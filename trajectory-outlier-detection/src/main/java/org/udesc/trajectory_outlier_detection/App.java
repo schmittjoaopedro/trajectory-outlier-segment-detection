@@ -54,7 +54,27 @@ public class App {
 //    		System.out.println(i);
 //    	}
     	
-    	calculateRegions(195, 284);
+    	calculateRegions(227, 255);
+    	calculateRegions(227, 284);
+    	calculateRegions(251, 282);
+    	calculateRegions(251, 283);
+    	calculateRegions(251, 342);
+    	calculateRegions(252, 312);
+    	calculateRegions(252, 342);
+    	calculateRegions(281, 580);
+    	calculateRegions(282, 283);
+    	calculateRegions(282, 758);
+    	calculateRegions(314, 343);
+    	calculateRegions(342, 460);
+    	calculateRegions(402, 795);
+    	calculateRegions(437, 706);
+    	calculateRegions(553, 593);
+    	calculateRegions(554, 586);
+    	calculateRegions(592, 678);
+    	calculateRegions(593, 650);
+    	calculateRegions(621, 650);
+    	calculateRegions(646, 766);
+    	calculateRegions(649, 681);
     	
     	System.out.println("End in: " + (System.currentTimeMillis() - start));
     }
@@ -114,7 +134,7 @@ public class App {
     public Trajectory getSubTrajectory(Trajectory trajectory, Grid gS, Grid gE) {
     	int start = -1;
     	int end = -1;
-    	double distance = -1;
+    	double timeDifference = -1;
     	
     	Trajectory subT = new Trajectory();
     	subT.setName(trajectory.getName());
@@ -125,10 +145,10 @@ public class App {
     			for(int j = i + 1; j < trajectory.getPoints().size(); j++) {
     				Point pE = trajectory.getPoints().get(j);
         			if(pE != pS && gE.betweenLat(pE) && gE.betweenLng(pE)) {
-        				if(pE.calculateDistance(pS) <= distance || distance == -1) {
+        				if(Math.abs(pE.getTimestamp() - pS.getTimestamp()) <= timeDifference || timeDifference == -1) {
         					start = i;
         					end = j;
-        					distance = pE.calculateDistance(pS);
+        					timeDifference = Math.abs(pE.getTimestamp() - pS.getTimestamp());
         				}
         			}
         		}
