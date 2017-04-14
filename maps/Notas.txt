@@ -1,23 +1,42 @@
 Interessantes
-_195_284
-_226_255
-_227_283
-_251_313
-_252_313
-_312_372
-_312_496
-_312_668
-_312_759
-_342_461
-_344_436
-_347_496
-_378_407
-_378_437
-_378_526
-_431_825
-_617_766
+calculateRegions(195,284);
+calculateRegions(226,255);
+calculateRegions(227,283);
+calculateRegions(251,313);
+calculateRegions(252,313);
+calculateRegions(312,372);
+calculateRegions(312,496);
+calculateRegions(312,668);
+calculateRegions(312,759);
+calculateRegions(342,461);
+calculateRegions(344,436);
+calculateRegions(347,496);
+calculateRegions(378,407);
+calculateRegions(378,437);
+calculateRegions(378,526);
+calculateRegions(431,825);
+calculateRegions(617,766);
 
 
 Para fixar
-calculateRegions(342, 460);
-calculateRegions(593, 650);
+calculateRegions(227,255);
+calculateRegions(227,284);
+calculateRegions(251,282);
+calculateRegions(251,283);
+calculateRegions(251,342);
+calculateRegions(252,312);
+calculateRegions(252,342);
+calculateRegions(281,580);
+calculateRegions(282,283);
+calculateRegions(282,758);
+calculateRegions(314,343);
+calculateRegions(342,460);
+calculateRegions(402,795);
+calculateRegions(437,706);
+calculateRegions(553,593);
+calculateRegions(554,586);
+calculateRegions(592,678);
+calculateRegions(593,650);
+calculateRegions(621,650);
+calculateRegions(646,766);
+calculateRegions(649,681);

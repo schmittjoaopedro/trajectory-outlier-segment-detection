@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 public class Trajectory implements Serializable {
 
 	/**
@@ -43,11 +46,18 @@ public class Trajectory implements Serializable {
 	}
 	
 	public void initialize() {
+		this.initialize(false);
+	}
+	
+	public void initialize(boolean removeOuliers) {
 		Collections.sort(this.getPoints(), new Comparator<Point>() {
 			public int compare(Point o1, Point o2) {
 				return (int) (o2.getTimestamp() - o1.getTimestamp());
 			}
 		});
+		if(removeOuliers) {
+			removeOutliersGaussianDistribution();
+		}
 		List<Point> temp = new ArrayList<Point>();
 		temp.addAll(this.getPoints());
 		Collections.sort(temp, new Comparator<Point>() {
@@ -113,6 +123,29 @@ public class Trajectory implements Serializable {
 			}
 		}
 		return false;
+	}
+	
+	public void removeOutliersGaussianDistribution() {
+		if(this.getPoints().size() > 1) {
+			double[] pointDistance = new double[this.getPoints().size()];
+			pointDistance[0] = this.getPoints().get(0).calculateDistance(this.getPoints().get(1));
+			DescriptiveStatistics stats = new DescriptiveStatistics();
+			for(int i =  1; i < this.getPoints().size(); i++) {
+				pointDistance[i] = this.getPoints().get(i - 1).calculateDistance(this.getPoints().get(i));
+				stats.addValue(pointDistance[i]);
+			}
+			NormalDistribution normal = new NormalDistribution(stats.getMean(), stats.getStandardDeviation());
+			List<Integer> indexToRemove = new ArrayList<Integer>();
+			for(int i = 0; i < pointDistance.length; i++) {
+				double prob = normal.cumulativeProbability(pointDistance[i]);
+				if(prob > 0.99865 || prob < 0.0135) { //3 sigmas
+					indexToRemove.add(i);
+				}
+			}
+			for(int i = indexToRemove.size() - 1; i >= 0; i--) {
+				this.getPoints().remove(this.getPoints().get(indexToRemove.get(i)));
+			}
+		}
 	}
 	
 	public String toStringDefault() {

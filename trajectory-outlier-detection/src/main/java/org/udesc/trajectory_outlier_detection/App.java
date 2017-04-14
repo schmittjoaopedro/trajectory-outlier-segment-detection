@@ -47,34 +47,12 @@ public class App {
     	regions = this.createGrid();
     	
     	long start = System.currentTimeMillis();
-//    	for(int i = 0; i < regions.size(); i++) {
-//    		for(int j = i + 1; j < regions.size(); j++) {
-//    			calculateRegions(i, j);
-//        	}
-//    		System.out.println(i);
-//    	}
-    	
-    	calculateRegions(227, 255);
-    	calculateRegions(227, 284);
-    	calculateRegions(251, 282);
-    	calculateRegions(251, 283);
-    	calculateRegions(251, 342);
-    	calculateRegions(252, 312);
-    	calculateRegions(252, 342);
-    	calculateRegions(281, 580);
-    	calculateRegions(282, 283);
-    	calculateRegions(282, 758);
-    	calculateRegions(314, 343);
-    	calculateRegions(342, 460);
-    	calculateRegions(402, 795);
-    	calculateRegions(437, 706);
-    	calculateRegions(553, 593);
-    	calculateRegions(554, 586);
-    	calculateRegions(592, 678);
-    	calculateRegions(593, 650);
-    	calculateRegions(621, 650);
-    	calculateRegions(646, 766);
-    	calculateRegions(649, 681);
+    	for(int i = 0; i < regions.size(); i++) {
+    		for(int j = i + 1; j < regions.size(); j++) {
+    			calculateRegions(i, j);
+        	}
+    		System.out.println(i);
+    	}
     	
     	System.out.println("End in: " + (System.currentTimeMillis() - start));
     }
@@ -135,24 +113,28 @@ public class App {
     	int start = -1;
     	int end = -1;
     	double timeDifference = -1;
-    	
     	Trajectory subT = new Trajectory();
     	subT.setName(trajectory.getName());
     	
     	for(int i = 0; i < trajectory.getPoints().size(); i++) {
     		Point pS = trajectory.getPoints().get(i);
     		if (gS.betweenLat(pS) && gS.betweenLng(pS)) {
-    			for(int j = i + 1; j < trajectory.getPoints().size(); j++) {
+    			for(int j = 0; j < trajectory.getPoints().size(); j++) {
     				Point pE = trajectory.getPoints().get(j);
         			if(pE != pS && gE.betweenLat(pE) && gE.betweenLng(pE)) {
-        				if(Math.abs(pE.getTimestamp() - pS.getTimestamp()) <= timeDifference || timeDifference == -1) {
+        				if(Math.abs(Math.abs(pE.getTimestamp()) - Math.abs(pS.getTimestamp())) <= timeDifference || timeDifference == -1) {
         					start = i;
         					end = j;
-        					timeDifference = Math.abs(pE.getTimestamp() - pS.getTimestamp());
+        					timeDifference = Math.abs(Math.abs(pE.getTimestamp()) - Math.abs(pS.getTimestamp()));
         				}
         			}
         		}
     		}
+    	}
+    	if(start > end) {
+    		int temp = start;
+    		start = end;
+    		end = temp;
     	}
     	if (start < end && start != -1 && end != -1) {
     		List<Point> points = trajectory.getPoints().subList(start, end);
@@ -165,7 +147,7 @@ public class App {
     		}
     	} else {
     		return null;
-    	} 
+    	}
     	subT.initialize();
     	return subT;
     }
@@ -281,21 +263,24 @@ public class App {
     	data.append(SR.toStringStart() + "\n");
     	data.append(ER.toStringEnd() + "\n");
     	
-    	data.append("//Default full trajectories\n");
-    	for(Group g : ST) {
-    		for(Trajectory t : g.getTrajectories()) {
+    	data.append("\n//Default full trajectories\n");
+    	for(int n = 0; n < ST.size(); n++) {
+    		data.append("\t//Group " + n + " = " + ST.get(n).getTrajectories().size() + "\n");
+    		for(Trajectory t : ST.get(n).getTrajectories()) {
     			data.append(t.toStringDefault() + "\n");
     		}
     	}
-    	data.append("//Default segment trajectories\n");
-    	for(Route r : NST) {
-    		for(Trajectory ts : r.getStandards()) {
+    	data.append("\n//Default segment trajectories\n");
+    	for(int n = 0; n < NST.size(); n++) {
+    		data.append("\t//Default segment " + n + " = " + NST.get(n).getStandards().size() + "\n");
+    		for(Trajectory ts : NST.get(n).getStandards()) {
     			data.append(ts.toStringDefault() + "\n");
     		}
     	}
-    	data.append("//Outlier segment trajectories\n");
-    	for(Route r : NST) {
-    		for(Trajectory nts : r.getNotStandards()) {
+    	data.append("\n//Outlier segment trajectories\n");
+    	for(int n = 0; n < NST.size(); n++) {
+    		data.append("\t//Outlier segment " + n + " = " + NST.get(n).getNotStandards().size() + "\n");
+    		for(Trajectory nts : NST.get(n).getNotStandards()) {
     			data.append(nts.toStringOutlier() + "\n");
     		}
     	}

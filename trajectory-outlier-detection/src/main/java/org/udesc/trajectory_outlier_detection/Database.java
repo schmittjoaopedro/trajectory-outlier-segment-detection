@@ -44,7 +44,7 @@ public class Database {
 									Long.valueOf(lineS[17])));
 						}
 					}
-					trajectory.initialize();
+					trajectory.initialize(true);
 					if (trajectory.getPoints().size() > 1) {
 						this.trajectories.add(trajectory);
 					}
