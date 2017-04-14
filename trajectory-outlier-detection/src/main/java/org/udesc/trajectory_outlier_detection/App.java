@@ -119,7 +119,7 @@ public class App {
     	for(int i = 0; i < trajectory.getPoints().size(); i++) {
     		Point pS = trajectory.getPoints().get(i);
     		if (gS.betweenLat(pS) && gS.betweenLng(pS)) {
-    			for(int j = 0; j < trajectory.getPoints().size(); j++) {
+    			for(int j = i; j < trajectory.getPoints().size(); j++) {
     				Point pE = trajectory.getPoints().get(j);
         			if(pE != pS && gE.betweenLat(pE) && gE.betweenLng(pE)) {
         				if(Math.abs(Math.abs(pE.getTimestamp()) - Math.abs(pS.getTimestamp())) <= timeDifference || timeDifference == -1) {
@@ -130,11 +130,6 @@ public class App {
         			}
         		}
     		}
-    	}
-    	if(start > end) {
-    		int temp = start;
-    		start = end;
-    		end = temp;
     	}
     	if (start < end && start != -1 && end != -1) {
     		List<Point> points = trajectory.getPoints().subList(start, end);
