@@ -134,16 +134,18 @@ public class Trajectory implements Serializable {
 				pointDistance[i] = this.getPoints().get(i - 1).calculateDistance(this.getPoints().get(i));
 				stats.addValue(pointDistance[i]);
 			}
-			NormalDistribution normal = new NormalDistribution(stats.getMean(), stats.getStandardDeviation());
-			List<Integer> indexToRemove = new ArrayList<Integer>();
-			for(int i = 0; i < pointDistance.length; i++) {
-				double prob = normal.cumulativeProbability(pointDistance[i]);
-				if(prob > 0.99865 || prob < 0.0135) { //3 sigmas
-					indexToRemove.add(i);
+			if(stats.getStandardDeviation() > 0) {
+				NormalDistribution normal = new NormalDistribution(stats.getMean(), stats.getStandardDeviation());
+				List<Integer> indexToRemove = new ArrayList<Integer>();
+				for(int i = 0; i < pointDistance.length; i++) {
+					double prob = normal.cumulativeProbability(pointDistance[i]);
+					if(prob > 0.99865 || prob < 0.0135) { //3 sigmas
+						indexToRemove.add(i);
+					}
 				}
-			}
-			for(int i = indexToRemove.size() - 1; i >= 0; i--) {
-				this.getPoints().remove(this.getPoints().get(indexToRemove.get(i)));
+				for(int i = indexToRemove.size() - 1; i >= 0; i--) {
+					this.getPoints().remove(this.getPoints().get(indexToRemove.get(i)));
+				}
 			}
 		}
 	}

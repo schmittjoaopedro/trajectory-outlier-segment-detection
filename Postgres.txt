@@ -1,0 +1,35 @@
+http://workshops.boundlessgeo.com/postgis-intro/introduction.html
+
+Root user: postgres
+Password: system
+#Logando como root
+psql -U postgres
+
+
+User: udesc
+Password: udesc
+Database: udesc
+
+
+#Conectando a base: psql DBNAME USERNAME
+psql -h localhost -U udesc udesc
+#Cria extenção POSTGIS
+sudo -u postgres psql -c "CREATE EXTENSION postgis; CREATE EXTENSION postgis_topology;" udesc
+#Deletar base de dados
+dropdb -U system outlier_detection
+#Dar permissão de super usuário.
+ALTER USER udesc WITH SUPERUSER;
+
+
+=============== exemplo ===============
+CREATE TABLE TRAJECTORY_TEST (
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(200),
+	trajectory GEOGRAPHY(MULTIPOINTM, 4326)
+);
+
+INSERT INTO trajectory_test (name, trajectory) VALUES ('Teste1', ST_GeomFromEWKT('SRID=4326;MULTIPOINTM(0 0 0,1 2 1)'));
+
+CREATE INDEX trajectory_test_gix ON trajectory_test USING GIST ( trajectory );
+
+SELECT name, ST_AsText(trajectory) from trajectory_test;

@@ -28,30 +28,38 @@ public class App {
 	String outputFolder = "/home/joao/Área de Trabalho/Mestrado/trajectory-outlier-segment-detection/maps/output";
 	
 	//References
-	List<Trajectory> trajectories;
 	List<Grid> regions;
+	List<Trajectory> trajectories;
 	List<Trajectory> candidates;
 	List<Group> trajectoriesGroup = new ArrayList<Group>();
 	List<Group> standardTrajectoriesGroup = new ArrayList<Group>();
 	List<Group> notStandardTrajectoriesGroup = new ArrayList<Group>();
 	
-	Database database = new Database("/home/joao/Área de Trabalho/Mestrado/Extracted/tidy/ALL");
+	PostgreSQL postgreSQL = new PostgreSQL();
+	
+	Database database = new Database("/home/joao/Área de Trabalho/Mestrado/Extracted/tidy/LGE Nexus 4");
 	
     public static void main( String[] args ) throws Exception {
     	new App().run();
     }
     
     public void run() throws Exception {
-    	database.initialize();
-    	trajectories = database.getTrajectories();
-    	regions = this.createGrid();
-    	
+//    	database.initialize();
+//    	trajectories = database.getTrajectories();
     	long start = System.currentTimeMillis();
+    	System.out.println("Loading db...");
+    	trajectories = postgreSQL.loadAllTrajectories();
+    	regions = this.createGrid();
+    	System.out.println("DB load in: "  + (System.currentTimeMillis() - start));
+    	
+    	start = System.currentTimeMillis();
+    	System.out.println("Starting calculations...");
     	for(int i = 0; i < regions.size(); i++) {
+    		long tStart = System.currentTimeMillis();
     		for(int j = i + 1; j < regions.size(); j++) {
     			calculateRegions(i, j);
         	}
-    		System.out.println(i);
+    		System.out.println(i + " in " + (System.currentTimeMillis() - tStart));
     	}
     	
     	System.out.println("End in: " + (System.currentTimeMillis() - start));
@@ -96,7 +104,7 @@ public class App {
     	return grids;
     }
     
-    public List<Trajectory> getCandidatesTrajectories(List<Trajectory> trajectories, Grid gridStart, Grid gridEnd, double tStart, double tEnd) {
+    public List<Trajectory> getCandidatesTrajectories(List<Trajectory> trajectories, Grid gridStart, Grid gridEnd, double tStart, double tEnd) throws Exception {
     	List<Trajectory> subTrajectories = new ArrayList<Trajectory>();
     	for(Trajectory trajectory : trajectories) {
     		Trajectory subTrajectory = this.getSubTrajectory(trajectory, gridStart, gridEnd);
