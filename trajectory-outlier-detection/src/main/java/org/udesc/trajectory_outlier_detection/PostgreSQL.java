@@ -19,8 +19,13 @@ public class PostgreSQL {
 	String url = "jdbc:postgresql://localhost:5432/nyc";
 	String user = "udesc";
 	String password = "udesc";
+	String tableName;
 	
 	private Map<String, Trajectory> buffer = new HashMap<String, Trajectory>();
+	
+	public PostgreSQL(String table) {
+		this.tableName = table;
+	}
 	
 	public void loadTrajectories(String path) {
 		try {
@@ -81,12 +86,12 @@ public class PostgreSQL {
 		StringBuilder ts = new StringBuilder();
 		for(int i = 0; i < t.getPoints().size(); i++) {
 			if(i == t.getPoints().size() - 1) {
-				ts.append(t.getPoints().get(i).getLat()).append(" ").append(t.getPoints().get(i).getLng()).append(" ").append(t.getPoints().get(i).getTimestamp());
+				ts.append(t.getPoints().get(i).getLng()).append(" ").append(t.getPoints().get(i).getLat()).append(" ").append(t.getPoints().get(i).getTimestamp());
 			} else {
-				ts.append(t.getPoints().get(i).getLat()).append(" ").append(t.getPoints().get(i).getLng()).append(" ").append(t.getPoints().get(i).getTimestamp()).append(",");
+				ts.append(t.getPoints().get(i).getLng()).append(" ").append(t.getPoints().get(i).getLat()).append(" ").append(t.getPoints().get(i).getTimestamp()).append(",");
 			}
 		}
-		String insert = "INSERT INTO trajectory_test (name, trajectory) VALUES ('"
+		String insert = "INSERT INTO " + tableName + " (name, trajectory) VALUES ('"
 				+ t.getName() + "', ST_GeomFromEWKT('SRID=4326;MULTIPOINTM("
 						+ ts.toString() + ")'));";
 		
@@ -101,7 +106,7 @@ public class PostgreSQL {
 	
 	public List<Trajectory> findTrajectories(Grid st, Grid en) throws Exception {
 		StringBuilder sql = new StringBuilder();
-			sql.append("select tt.name, ST_AsText(tt.trajectory) trajectory from trajectory_test tt ")
+			sql.append("select tt.name, ST_AsText(tt.trajectory) trajectory from").append(tableName).append(" tt ")
 				.append("inner join ( ")
 						.append("select ")
 						.append("id, ")
@@ -116,7 +121,7 @@ public class PostgreSQL {
 							.append("))'), ")
 							.append("trajectory ")
 						.append(") as st ")
-						.append("from trajectory_test ")
+						.append("from ").append(tableName).append(" ")
 					.append(") start_db on start_db.id = tt.id ")
 					.append("inner join ( ")
 						.append("select ")
@@ -132,7 +137,7 @@ public class PostgreSQL {
 							.append("))'), ")
 							.append("trajectory ")
 						.append(") as en ")
-						.append("from trajectory_test ")
+						.append("from ").append(tableName).append(" ")
 					.append(") end_db on end_db.id = tt.id ")
 				.append("where start_db.st = true and end_db.en = true");
 			
@@ -153,8 +158,8 @@ public class PostgreSQL {
 				for(String points : pointsDB) {
 					String pointDB[] = points.split(" ");
 					Point point = new Point();
-					point.setLat(Double.valueOf(pointDB[0]));
-					point.setLng(Double.valueOf(pointDB[1]));
+					point.setLng(Double.valueOf(pointDB[0]));
+					point.setLat(Double.valueOf(pointDB[1]));
 					point.setTimestamp(Long.valueOf(pointDB[2]));
 					trajectory.getPoints().add(point);
 				}
@@ -171,7 +176,7 @@ public class PostgreSQL {
 	
 	public List<Trajectory> loadAllTrajectories() throws SQLException {
 		List<Trajectory> trajectories = new ArrayList<Trajectory>();
-		StringBuilder sql = new StringBuilder("select name, ST_AsText(trajectory) as trajectory from trajectory_test");
+		StringBuilder sql = new StringBuilder("select name, ST_AsText(trajectory) as trajectory from ").append(tableName).append(" ");
 		Connection conn = this.getConn();
 		Statement stmt = conn.createStatement();
 		ResultSet rs = stmt.executeQuery(sql.toString());
@@ -185,8 +190,8 @@ public class PostgreSQL {
 			for(String points : pointsDB) {
 				String pointDB[] = points.split(" ");
 				Point point = new Point();
-				point.setLat(Double.valueOf(pointDB[0]));
-				point.setLng(Double.valueOf(pointDB[1]));
+				point.setLng(Double.valueOf(pointDB[0]));
+				point.setLat(Double.valueOf(pointDB[1]));
 				point.setTimestamp(Long.valueOf(pointDB[2]));
 				trajectory.getPoints().add(point);
 			}
@@ -203,9 +208,9 @@ public class PostgreSQL {
 		return DriverManager.getConnection(url, user, password);
 	}
 	
-//	public static void main(String[] args) {
-//		PostgreSQL postgreSQL = new PostgreSQL();
-//		postgreSQL.loadTrajectories("/home/joao/Área de Trabalho/Mestrado/Extracted/tidy/ALL");
-//	}
+	public static void main(String[] args) {
+		PostgreSQL postgreSQL = new PostgreSQL("trajectory_test");
+		postgreSQL.loadTrajectories("/home/joao/Área de Trabalho/Mestrado/Extracted/tidy/ALL");
+	}
 	
 }

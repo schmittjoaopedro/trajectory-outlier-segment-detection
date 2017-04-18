@@ -150,6 +150,31 @@ public class Trajectory implements Serializable {
 		}
 	}
 	
+	public void interpolate(double distance) {
+		int pointSize = this.getPoints().size();
+		for(int i = 0; i < pointSize - 1; i++) {
+			Point prev = this.getPoints().get(i);
+			Point next = this.getPoints().get(i + 1);
+			double pointDist = prev.calculateDistance(next);
+			if(pointDist >= distance) {
+				double latRange = next.getLat() - prev.getLat();
+				double lngRange = next.getLng() - prev.getLng();
+				long timeRange = next.getTimestamp() - prev.getTimestamp();
+				double qtde = (int) ((pointDist / distance) + 1);
+				for(int n = 1; n < qtde; n++) {
+					Point p = new Point();
+					p.setHour(prev.getHour());
+					p.setMinutes(prev.getMinutes());
+					p.setLat(prev.getLat() + ((latRange / qtde) * n));
+					p.setLng(prev.getLng() + ((lngRange / qtde) * n));
+					p.setTimestamp(prev.getTimestamp() + ((long) ((timeRange / qtde) * n)));
+					this.getPoints().add(i + n, p);
+				}
+				pointSize = this.getPoints().size();
+			}
+		}
+	}
+	
 	public String toStringDefault() {
 		String STstr = "drawPoints([";
 		for(int i = 0; i < this.getPoints().size(); i++) {

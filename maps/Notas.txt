@@ -1,23 +1,5 @@
+===================== Uber
 Interessantes
-calculateRegions(195,284);
-calculateRegions(227,255);
-calculateRegions(251,343);
-calculateRegions(251,579);
-calculateRegions(251,580);
-calculateRegions(252,793);
-calculateRegions(281,460);
-calculateRegions(282,284);
-calculateRegions(282,436);
-calculateRegions(314,377);
-calculateRegions(342,759);
 
 
 Para fixar
-calculateRegions(251,312);
-calculateRegions(281,282);
-calculateRegions(281,312);
-calculateRegions(281,342);
-calculateRegions(312,490);
-calculateRegions(372,579);
-calculateRegions(490,797);
-calculateRegions(498,767);

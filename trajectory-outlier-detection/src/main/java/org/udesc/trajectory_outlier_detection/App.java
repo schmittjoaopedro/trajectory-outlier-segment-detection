@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.udesc.trajectory_outlier_detection.extractors.UberExtractor;
 
 /**
  * Hello world!
@@ -20,10 +21,14 @@ public class App {
 	double timeEnd = 24.0;
 	int stdQtde = 1;
 	
-	double latSt = -26.370924;
-	double latEn = -26.237597;
-	double lngSt = -48.944078;
-	double lngEn = -48.775826;
+//	double latSt = -26.370924;
+//	double latEn = -26.237597;
+//	double lngSt = -48.944078;
+//	double lngEn = -48.775826;
+	double latSt = 37.711624;
+	double latEn = 37.813405;
+	double lngSt = -122.495955;
+	double lngEn = -122.390732;
 	double L = 30.0;
 	String outputFolder = "/home/joao/Área de Trabalho/Mestrado/trajectory-outlier-segment-detection/maps/output";
 	
@@ -35,7 +40,8 @@ public class App {
 	List<Group> standardTrajectoriesGroup = new ArrayList<Group>();
 	List<Group> notStandardTrajectoriesGroup = new ArrayList<Group>();
 	
-	PostgreSQL postgreSQL = new PostgreSQL();
+//	PostgreSQL postgreSQL = new PostgreSQL("trajectory_test");
+	PostgreSQL postgreSQL = new PostgreSQL("trajectory_geolife");
 	
 	Database database = new Database("/home/joao/Área de Trabalho/Mestrado/Extracted/tidy/LGE Nexus 4");
 	
@@ -44,13 +50,17 @@ public class App {
     }
     
     public void run() throws Exception {
-//    	database.initialize();
-//    	trajectories = database.getTrajectories();
     	long start = System.currentTimeMillis();
     	System.out.println("Loading db...");
-    	trajectories = postgreSQL.loadAllTrajectories();
+//    	trajectories = postgreSQL.loadAllTrajectories();
+    	UberExtractor extractor = new UberExtractor();
+		extractor.loadTrajectories("/home/joao/Área de Trabalho/Mestrado/Extracted/uber/all.tsv");
+//    	this.getBounds(trajectories);
+		
+		trajectories = extractor.getTrajectories();
     	regions = this.createGrid();
     	System.out.println("DB load in: "  + (System.currentTimeMillis() - start));
+    	
     	
     	start = System.currentTimeMillis();
     	System.out.println("Starting calculations...");
@@ -288,9 +298,31 @@ public class App {
     		}
     	}
     	FileUtils.write(new File(file), data.toString(), "UTF-8");
-//    	System.out.println(data.toString());
     	
     }
     
+    public void getBounds(List<Trajectory> trajectories) {
+    	double minLat = 0, maxLat = 0, minLng = 0, maxLng = 0;
+    	for(Trajectory trajectory : trajectories) {
+    		for(Point p : trajectory.getPoints()) {
+    			if(p.getLat() < minLat || minLat == 0) {
+    				minLat = p.getLat();
+    			}
+    			if(p.getLat() > maxLat || maxLat == 0) {
+    				maxLat = p.getLat();
+    			}
+    			if(p.getLng() < minLng || minLng == 0) {
+    				minLng = p.getLng();
+    			}
+    			if(p.getLng() > maxLng || maxLng == 0) {
+    				maxLng = p.getLng();
+    			}
+    		}
+    	}
+    	System.out.println("Min lat: " + minLat);
+    	System.out.println("Max lat: " + maxLat);
+    	System.out.println("Min lng: " + minLng);
+    	System.out.println("Max lng: " + maxLng);
+    }
     
 }
