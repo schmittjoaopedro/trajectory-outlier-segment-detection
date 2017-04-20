@@ -56,7 +56,7 @@ public class UberExtractor {
 			}
 			bufferedReader.close();
 			for(Trajectory t : trajectories.values()) {
-				t.initialize();
+				t.initialize(true);
 				t.interpolate(0.0003);
 				t.initialize(true);
 			}

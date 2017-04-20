@@ -7,7 +7,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.udesc.trajectory_outlier_detection.extractors.UberExtractor;
 
 /**
  * Hello world!
@@ -21,14 +20,14 @@ public class App {
 	double timeEnd = 24.0;
 	int stdQtde = 1;
 	
-//	double latSt = -26.370924;
-//	double latEn = -26.237597;
-//	double lngSt = -48.944078;
-//	double lngEn = -48.775826;
-	double latSt = 37.711624;
-	double latEn = 37.813405;
-	double lngSt = -122.495955;
-	double lngEn = -122.390732;
+	double latSt = -26.370924;
+	double latEn = -26.237597;
+	double lngSt = -48.944078;
+	double lngEn = -48.775826;
+//	double latSt = 37.711624;
+//	double latEn = 37.813405;
+//	double lngSt = -122.495955;
+//	double lngEn = -122.390732;
 	double L = 30.0;
 	String outputFolder = "/home/joao/Área de Trabalho/Mestrado/trajectory-outlier-segment-detection/maps/output";
 	
@@ -40,8 +39,8 @@ public class App {
 	List<Group> standardTrajectoriesGroup = new ArrayList<Group>();
 	List<Group> notStandardTrajectoriesGroup = new ArrayList<Group>();
 	
-//	PostgreSQL postgreSQL = new PostgreSQL("trajectory_test");
-	PostgreSQL postgreSQL = new PostgreSQL("trajectory_geolife");
+	PostgreSQL postgreSQL = new PostgreSQL("trajectory_test");
+//	PostgreSQL postgreSQL = new PostgreSQL("trajectory_geolife");
 	
 	Database database = new Database("/home/joao/Área de Trabalho/Mestrado/Extracted/tidy/LGE Nexus 4");
 	
@@ -52,15 +51,15 @@ public class App {
     public void run() throws Exception {
     	long start = System.currentTimeMillis();
     	System.out.println("Loading db...");
-//    	trajectories = postgreSQL.loadAllTrajectories();
-    	UberExtractor extractor = new UberExtractor();
-		extractor.loadTrajectories("/home/joao/Área de Trabalho/Mestrado/Extracted/uber/all.tsv");
+    	trajectories = postgreSQL.loadAllTrajectories();
+//    	UberExtractor extractor = new UberExtractor();
+//		extractor.loadTrajectories("/home/joao/Área de Trabalho/Mestrado/Extracted/uber/all.tsv");
+//		trajectories = extractor.getTrajectories();
 //    	this.getBounds(trajectories);
-		
-		trajectories = extractor.getTrajectories();
+    	
     	regions = this.createGrid();
     	System.out.println("DB load in: "  + (System.currentTimeMillis() - start));
-    	
+    	System.out.println("Trajectories loaded: " + trajectories.size());
     	
     	start = System.currentTimeMillis();
     	System.out.println("Starting calculations...");
@@ -225,14 +224,14 @@ public class App {
     	Route route = new Route();
     	
     	boolean isStd = false;
-    	Boolean lastStd = null;
+    	boolean lastStd = false;
     	
     	List<Point> segment = new ArrayList<Point>();
     	for(Point p : ns.getPoints()) {
     		isStd = false;
     		for(Group g : GT) {
     			for(Trajectory st : g.getTrajectories()) {
-    				if(st.binarySearch(p, distance)) {
+    				if(st.isInStandardPath(ns, p, distance, 40.0)) {
 						isStd = true;
 						break;
     				}
@@ -240,26 +239,28 @@ public class App {
     			}
     			if(isStd == true) break;
     		}
-    		if((lastStd == null || lastStd != isStd) && segment.size() > 1) {
-    			if(lastStd != null) {
+    		segment.add(p);
+    		if(lastStd != isStd) {
+    			if(segment.size() > 1) {
     				Trajectory t = new Trajectory();
     				t.setPoints(segment);
     				t.initialize();
-    				if(lastStd)
+    				if(lastStd) {
     					route.getStandards().add(t);
-    				else
+    				} else {
     					route.getNotStandards().add(t);
-        			segment = new ArrayList<Point>();
+    				}
     			}
     			lastStd = isStd;
+    			segment = new ArrayList<Point>();
+    			segment.add(p);
     		}
-    		segment.add(p);
     	}
-    	if(lastStd != null) {
+    	if(segment.size() > 1) {
 			Trajectory t = new Trajectory();
 			t.setPoints(segment);
 			t.initialize();
-			if(lastStd)
+			if(isStd)
 				route.getStandards().add(t);
 			else
 				route.getNotStandards().add(t);
