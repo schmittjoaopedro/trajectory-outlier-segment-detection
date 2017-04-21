@@ -1,2 +1,66 @@
 San Francisco
-_176_560
+========================================
+calculateRegionsTime(117,505);
+calculateRegionsTime(225,199); //Provado
+calculateRegionsTime(235,146); //Provado
+calculateRegionsTime(324,504);
+calculateRegionsTime(325,267);
+calculateRegionsTime(349,410); //Provado
+calculateRegionsTime(359,449); //Provado
+calculateRegionsTime(382,501);
+calculateRegionsTime(386,355);
+calculateRegionsTime(416,265);
+calculateRegionsTime(443,563);
+calculateRegionsTime(467,531);
+calculateRegionsTime(468,504);
+calculateRegionsTime(471,500);
+calculateRegionsTime(475,415);
+calculateRegionsTime(500,559);
+calculateRegionsTime(505,561); //Provado
+calculateRegionsTime(505,626);
+calculateRegionsTime(530,621); //Provado
+calculateRegionsTime(532,501);
+calculateRegionsTime(533,658); //Provado
+calculateRegionsTime(555,586);
+calculateRegionsTime(557,564);
+calculateRegionsTime(563,624);
+calculateRegionsTime(564,560);
+calculateRegionsTime(564,595);
+calculateRegionsTime(564,621); //Provado
+calculateRegionsTime(568,629); //Provado
+calculateRegionsTime(589,593); //Provado
+calculateRegionsTime(596,564);
+calculateRegionsTime(618,620);
+calculateRegionsTime(619,652);
+calculateRegionsTime(620,562);
+calculateRegionsTime(621,564);
+calculateRegionsTime(621,594); //Provado
+calculateRegionsTime(621,652);
+calculateRegionsTime(622,595);
+calculateRegionsTime(626,629); //Provado
+calculateRegionsTime(628,505); //Provado
+calculateRegionsTime(650,682); //Provado
+calculateRegionsTime(657,597);
+calculateRegionsTime(688,656);
+calculateRegionsTime(711,683);
+calculateRegionsTime(741,746);
+calculateRegionsTime(767,680);
+calculateRegionsTime(777,718);
+calculateRegionsTime(830,833); //Provado
+
+
+
+Joinville
+========================================
+calculateRegionsTime(282,550);
+calculateRegionsTime(283,438); //Provado
+calculateRegionsTime(312,460);
+calculateRegionsTime(438,706); //Provado
+calculateRegionsTime(468,466);
+calculateRegionsTime(527,677); //Provado
+calculateRegionsTime(557,556); //Provado
+calculateRegionsTime(706,528);
+calculateRegionsTime(708,711); //Provado
+calculateRegionsTime(736,587);
+calculateRegionsTime(737,826);
+calculateRegionsTime(826,554);

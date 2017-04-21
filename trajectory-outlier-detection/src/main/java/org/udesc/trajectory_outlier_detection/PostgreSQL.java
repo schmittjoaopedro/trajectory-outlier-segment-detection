@@ -91,9 +91,9 @@ public class PostgreSQL {
 				ts.append(t.getPoints().get(i).getLng()).append(" ").append(t.getPoints().get(i).getLat()).append(" ").append(t.getPoints().get(i).getTimestamp()).append(",");
 			}
 		}
-		String insert = "INSERT INTO " + tableName + " (name, trajectory) VALUES ('"
-				+ t.getName() + "', ST_GeomFromEWKT('SRID=4326;MULTIPOINTM("
-						+ ts.toString() + ")'));";
+		String insert = "INSERT INTO " + tableName + " (name, hour, minute, trajectory) VALUES ('"
+				+ t.getName() + "'," + t.getPoints().get(0).getHour() + "," + t.getPoints().get(0).getMinutes() + 
+				", ST_GeomFromEWKT('SRID=4326;MULTIPOINTM(" + ts.toString() + ")'));";
 		
 		Connection conn = this.getConn();
 		conn.setAutoCommit(false);
@@ -176,13 +176,15 @@ public class PostgreSQL {
 	
 	public List<Trajectory> loadAllTrajectories() throws SQLException {
 		List<Trajectory> trajectories = new ArrayList<Trajectory>();
-		StringBuilder sql = new StringBuilder("select name, ST_AsText(trajectory) as trajectory from ").append(tableName).append(" ");
+		StringBuilder sql = new StringBuilder("select name, hour, minute, ST_AsText(trajectory) as trajectory from ").append(tableName).append(" ");
 		Connection conn = this.getConn();
 		Statement stmt = conn.createStatement();
 		ResultSet rs = stmt.executeQuery(sql.toString());
 		while(rs.next()) {
 			String name = rs.getString("name");
 			String trajectoryDB = rs.getString("trajectory");
+			Integer hour = rs.getInt("hour");
+			Integer minutes = rs.getInt("minute");
 			trajectoryDB = trajectoryDB.substring(trajectoryDB.indexOf("(") + 1, trajectoryDB.indexOf(")"));
 			String pointsDB[] = trajectoryDB.split(",");
 			Trajectory trajectory = new Trajectory();
@@ -193,6 +195,8 @@ public class PostgreSQL {
 				point.setLng(Double.valueOf(pointDB[0]));
 				point.setLat(Double.valueOf(pointDB[1]));
 				point.setTimestamp(Long.valueOf(pointDB[2]));
+				point.setHour(hour);
+				point.setMinutes(minutes);
 				trajectory.getPoints().add(point);
 			}
 			trajectory.initialize(true);

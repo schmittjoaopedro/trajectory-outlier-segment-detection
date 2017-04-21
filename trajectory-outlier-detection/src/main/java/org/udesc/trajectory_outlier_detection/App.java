@@ -20,10 +20,12 @@ public class App {
 	double timeEnd = 24.0;
 	int stdQtde = 1;
 	
+//	Joinville
 	double latSt = -26.370924;
 	double latEn = -26.237597;
 	double lngSt = -48.944078;
 	double lngEn = -48.775826;
+//	San Francisco
 //	double latSt = 37.711624;
 //	double latEn = 37.813405;
 //	double lngSt = -122.495955;
@@ -51,11 +53,14 @@ public class App {
     public void run() throws Exception {
     	long start = System.currentTimeMillis();
     	System.out.println("Loading db...");
+    	
     	trajectories = postgreSQL.loadAllTrajectories();
-//    	UberExtractor extractor = new UberExtractor();
+
+//     	UberExtractor extractor = new UberExtractor();
 //		extractor.loadTrajectories("/home/joao/Área de Trabalho/Mestrado/Extracted/uber/all.tsv");
 //		trajectories = extractor.getTrajectories();
-    	this.getBounds(trajectories);
+    	
+//    	this.getBounds(trajectories);
     	
     	regions = this.createGrid();
     	System.out.println("DB load in: "  + (System.currentTimeMillis() - start));
@@ -71,14 +76,15 @@ public class App {
 //        	}
 //    		System.out.println(i + " in " + (System.currentTimeMillis() - tStart));
 //    	}
-    	for(int n = 0; n < 10000; n++) {
-    		int i = (int) (Math.random() * regions.size());
-    		int j = (int) (Math.random() * regions.size());
-    		calculateRegions(i, j);
-    		if(n % 100 == 0) {
-    			System.out.println(n);
-    		}
-    	}
+    	
+//    	for(int n = 0; n < 10000; n++) {
+//    		int i = (int) (Math.random() * regions.size());
+//    		int j = (int) (Math.random() * regions.size());
+//    		calculateRegions(i, j);
+//    		if(n % 100 == 0) {
+//    			System.out.println(n);
+//    		}
+//    	}
     	
 //    	Joinville
 //    	calculateRegions(554,526);
@@ -87,6 +93,19 @@ public class App {
 //    	calculateRegions(176, 560);
     	
     	System.out.println("End in: " + (System.currentTimeMillis() - start));
+    }
+    
+    public void calculateRegionsTime(int i, int j) throws Exception {
+    	for(int t = 1; t <= 24; t++) {
+    		if(t != 24) {
+    			timeStart = t - 1;
+    			timeEnd = t;
+    		} else {
+    			timeStart = 23;
+    			timeEnd = 0;
+    		}
+    		calculateRegions(i, j);
+    	}
     }
 
 	private void calculateRegions(int i, int j) throws Exception {
@@ -331,7 +350,7 @@ public class App {
     
     public void printData(Grid SR, Grid ER, List<Group> ST, List<Route> NST, int i, int j) throws Exception {
     	
-    	String file = outputFolder + "/_" + i + "_" + j + ".txt";
+    	String file = outputFolder + "/_" + i + "_" + j + "_" + timeStart + ".txt";
     	StringBuilder data = new StringBuilder();
     	
     	data.append("//Regions\n");
