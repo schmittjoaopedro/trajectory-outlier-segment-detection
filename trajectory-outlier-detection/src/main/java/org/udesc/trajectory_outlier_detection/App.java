@@ -55,7 +55,7 @@ public class App {
 //    	UberExtractor extractor = new UberExtractor();
 //		extractor.loadTrajectories("/home/joao/Área de Trabalho/Mestrado/Extracted/uber/all.tsv");
 //		trajectories = extractor.getTrajectories();
-//    	this.getBounds(trajectories);
+    	this.getBounds(trajectories);
     	
     	regions = this.createGrid();
     	System.out.println("DB load in: "  + (System.currentTimeMillis() - start));
@@ -63,6 +63,7 @@ public class App {
     	
     	start = System.currentTimeMillis();
     	System.out.println("Starting calculations...");
+    	
 //    	for(int i = 0; i < regions.size(); i++) {
 //    		long tStart = System.currentTimeMillis();
 //    		for(int j = i + 1; j < regions.size(); j++) {
@@ -70,48 +71,20 @@ public class App {
 //        	}
 //    		System.out.println(i + " in " + (System.currentTimeMillis() - tStart));
 //    	}
+    	for(int n = 0; n < 10000; n++) {
+    		int i = (int) (Math.random() * regions.size());
+    		int j = (int) (Math.random() * regions.size());
+    		calculateRegions(i, j);
+    		if(n % 100 == 0) {
+    			System.out.println(n);
+    		}
+    	}
     	
 //    	Joinville
-    	calculateRegions(196, 255);
-    	calculateRegions(252, 372);
-    	calculateRegions(284, 317);
-    	calculateRegions(312, 795);
-    	calculateRegions(342, 579);
-    	calculateRegions(406, 797);
+//    	calculateRegions(554,526);
     	
 //    	Uber
-//    	calculateRegions(12,199);
-//    	calculateRegions(155,278);
-//    	calculateRegions(175,445);
-//    	calculateRegions(196,291);
-//    	calculateRegions(201,471);
-//    	calculateRegions(206,298);
-//    	calculateRegions(260,415);
-//    	calculateRegions(291,565);
-//    	calculateRegions(318,467);
-//    	calculateRegions(328,478);
-//    	calculateRegions(349,351);
-//    	calculateRegions(355,383);
-//    	calculateRegions(377,408);
-//    	calculateRegions(385,530);
-//    	calculateRegions(410,588);
-//    	calculateRegions(416,717);
-//    	calculateRegions(434,506);
-//    	calculateRegions(437,624);
-//    	calculateRegions(457,497);
-//    	calculateRegions(467,656);
-//    	calculateRegions(471,534);
-//    	calculateRegions(485,607);
-//    	calculateRegions(493,521);
-//    	calculateRegions(500,712);
-//    	calculateRegions(507,591);
-//    	calculateRegions(521,628);
-//    	calculateRegions(527,678);
-//    	calculateRegions(533,599);
-//    	calculateRegions(546,733);//*
-//    	calculateRegions(554,561);
-//    	calculateRegions(559,681);
-//    	calculateRegions(564,626);
+//    	calculateRegions(176, 560);
     	
     	System.out.println("End in: " + (System.currentTimeMillis() - start));
     }
@@ -163,6 +136,9 @@ public class App {
     				tStart <= subTrajectory.getPoints().get(0).getHour() &&
     				subTrajectory.getPoints().get(subTrajectory.getPoints().size() - 1).getHour() <= tEnd) {
     			subTrajectories.add(subTrajectory);
+    			for(Point p : subTrajectory.getPoints()) {
+    				p.setStandard(false);
+    			}
     		}
     	}
     	return subTrajectories;

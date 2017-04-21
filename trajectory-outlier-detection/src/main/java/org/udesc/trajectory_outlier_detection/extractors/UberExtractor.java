@@ -58,7 +58,7 @@ public class UberExtractor {
 			for(Trajectory t : trajectories.values()) {
 				t.initialize(true);
 				t.interpolate(0.0003);
-				t.initialize(true);
+				t.initialize();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

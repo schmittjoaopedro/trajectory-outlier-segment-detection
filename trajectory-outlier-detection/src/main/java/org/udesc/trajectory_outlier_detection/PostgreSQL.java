@@ -196,9 +196,11 @@ public class PostgreSQL {
 				trajectory.getPoints().add(point);
 			}
 			trajectory.initialize(true);
-			trajectory.interpolate(0.0003);
-			trajectory.initialize(true);
-			trajectories.add(trajectory);
+			if(!trajectory.getPoints().isEmpty()) {
+				trajectory.interpolate(0.0003);
+				trajectory.initialize();
+				trajectories.add(trajectory);
+			}
 		}
 		rs.close();
 		stmt.close();

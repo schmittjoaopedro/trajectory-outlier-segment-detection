@@ -88,7 +88,7 @@ public class Trajectory implements Serializable {
 			}
 		}
 		
-		if(middle != 0) {
+		if(middle >= 0) {
 			int min = middle, max = middle;
 			double dist = 0;
 			while(dist < distance && min >= 0) {
@@ -143,7 +143,7 @@ public class Trajectory implements Serializable {
 				pointDistance[i] = this.getPoints().get(i - 1).calculateDistance(this.getPoints().get(i));
 				stats.addValue(pointDistance[i]);
 			}
-			if(stats.getStandardDeviation() > 0) {
+			if(stats.getStandardDeviation() > 0 && stats.getStandardDeviation() < 0.001) {
 				NormalDistribution normal = new NormalDistribution(stats.getMean(), stats.getStandardDeviation());
 				List<Integer> indexToRemove = new ArrayList<Integer>();
 				for(int i = 0; i < pointDistance.length; i++) {
@@ -155,6 +155,8 @@ public class Trajectory implements Serializable {
 				for(int i = indexToRemove.size() - 1; i >= 0; i--) {
 					this.getPoints().remove(this.getPoints().get(indexToRemove.get(i)));
 				}
+			} else {
+				this.getPoints().clear();
 			}
 		}
 	}
