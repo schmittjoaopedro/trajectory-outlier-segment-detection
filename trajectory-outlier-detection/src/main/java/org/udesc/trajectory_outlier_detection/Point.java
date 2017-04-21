@@ -2,7 +2,7 @@ package org.udesc.trajectory_outlier_detection;
 
 import java.io.Serializable;
 
-public class Point implements Serializable {
+public class Point implements Serializable, com.goebl.simplify.Point, Cloneable {
 
 	/**
 	 * 
@@ -18,6 +18,8 @@ public class Point implements Serializable {
 	private double lng;
 	
 	private long timestamp;
+	
+	boolean standard = false;
 	
 	public Point() {
 		super();
@@ -74,6 +76,27 @@ public class Point implements Serializable {
 	
 	public double calculateDistance(Point p) {
 		return Math.sqrt(Math.pow(this.getLat() - p.getLat(), 2) + Math.pow(this.getLng() - p.getLng(), 2));
+	}
+
+	public double getX() {
+		return this.lng;
+	}
+
+	public double getY() {
+		return this.lat;
+	}
+
+	public boolean isStandard() {
+		return standard;
+	}
+
+	public void setStandard(boolean standard) {
+		this.standard = standard;
+	}
+	
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return super.clone();
 	}
 	
 }

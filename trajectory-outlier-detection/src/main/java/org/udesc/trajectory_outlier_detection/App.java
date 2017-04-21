@@ -63,13 +63,55 @@ public class App {
     	
     	start = System.currentTimeMillis();
     	System.out.println("Starting calculations...");
-    	for(int i = 0; i < regions.size(); i++) {
-    		long tStart = System.currentTimeMillis();
-    		for(int j = i + 1; j < regions.size(); j++) {
-    			calculateRegions(i, j);
-        	}
-    		System.out.println(i + " in " + (System.currentTimeMillis() - tStart));
-    	}
+//    	for(int i = 0; i < regions.size(); i++) {
+//    		long tStart = System.currentTimeMillis();
+//    		for(int j = i + 1; j < regions.size(); j++) {
+//    			calculateRegions(i, j);
+//        	}
+//    		System.out.println(i + " in " + (System.currentTimeMillis() - tStart));
+//    	}
+    	
+//    	Joinville
+    	calculateRegions(196, 255);
+    	calculateRegions(252, 372);
+    	calculateRegions(284, 317);
+    	calculateRegions(312, 795);
+    	calculateRegions(342, 579);
+    	calculateRegions(406, 797);
+    	
+//    	Uber
+//    	calculateRegions(12,199);
+//    	calculateRegions(155,278);
+//    	calculateRegions(175,445);
+//    	calculateRegions(196,291);
+//    	calculateRegions(201,471);
+//    	calculateRegions(206,298);
+//    	calculateRegions(260,415);
+//    	calculateRegions(291,565);
+//    	calculateRegions(318,467);
+//    	calculateRegions(328,478);
+//    	calculateRegions(349,351);
+//    	calculateRegions(355,383);
+//    	calculateRegions(377,408);
+//    	calculateRegions(385,530);
+//    	calculateRegions(410,588);
+//    	calculateRegions(416,717);
+//    	calculateRegions(434,506);
+//    	calculateRegions(437,624);
+//    	calculateRegions(457,497);
+//    	calculateRegions(467,656);
+//    	calculateRegions(471,534);
+//    	calculateRegions(485,607);
+//    	calculateRegions(493,521);
+//    	calculateRegions(500,712);
+//    	calculateRegions(507,591);
+//    	calculateRegions(521,628);
+//    	calculateRegions(527,678);
+//    	calculateRegions(533,599);
+//    	calculateRegions(546,733);//*
+//    	calculateRegions(554,561);
+//    	calculateRegions(559,681);
+//    	calculateRegions(564,626);
     	
     	System.out.println("End in: " + (System.currentTimeMillis() - start));
     }
@@ -172,7 +214,7 @@ public class App {
     			for(Point pc : candidate.getPoints()) {
     				currentGroup = null;
     				for(Trajectory tg : g.getTrajectories()) {
-    					if(tg.binarySearch(pc, d)) {
+    					if(tg.binarySearch(pc, d) != null) {
 							currentGroup = g;
 							break;
     					}
@@ -222,49 +264,92 @@ public class App {
     
     public Route getNotStandardTrajectoriesSegments(Trajectory ns, List<Group> GT, double distance) {
     	Route route = new Route();
-    	
-    	boolean isStd = false;
-    	boolean lastStd = false;
-    	
-    	List<Point> segment = new ArrayList<Point>();
     	for(Point p : ns.getPoints()) {
-    		isStd = false;
     		for(Group g : GT) {
     			for(Trajectory st : g.getTrajectories()) {
-    				if(st.isInStandardPath(ns, p, distance, 40.0)) {
-						isStd = true;
+    				if(st.binarySearch(p, distance) != null) {
+    					p.setStandard(true);
 						break;
     				}
-    				if(isStd == true) break;
+    				if(p.isStandard()) break;
     			}
-    			if(isStd == true) break;
+    			if(p.isStandard()) break;
     		}
-    		segment.add(p);
-    		if(lastStd != isStd) {
-    			if(segment.size() > 1) {
-    				Trajectory t = new Trajectory();
-    				t.setPoints(segment);
-    				t.initialize();
-    				if(lastStd) {
-    					route.getStandards().add(t);
-    				} else {
-    					route.getNotStandards().add(t);
-    				}
+    		
+    	}
+    	
+    	for(int i = 1; i < ns.getPoints().size() - 1; i++) {
+    		Point p = ns.getPoints().get(i);
+    		if(!p.isStandard()) {
+    			int prev = i - 1;
+    			int next = i + 1;
+    			Point current = p;
+    			Point prevP = ns.getPoints().get(prev);
+    			Point nextP = ns.getPoints().get(next);
+    			prev--;
+    			next++;
+    			while(prevP.isStandard() && prev >= 0) {
+    				for(Group g : GT) {
+    	    			for(Trajectory st : g.getTrajectories()) {
+    	    				if(!st.isLowerBoundAngle(current, prevP, distance, 30.0)) {
+    	    					prevP.setStandard(false);
+    							break;
+    	    				}
+    	    				if(!prevP.isStandard()) break;
+    	    			}
+    	    			if(!prevP.isStandard()) break;
+    	    		}
+    				if(prevP.isStandard()) break;
+    				current = prevP;
+    				prevP = ns.getPoints().get(prev);
+    				prev--;
     			}
-    			lastStd = isStd;
-    			segment = new ArrayList<Point>();
-    			segment.add(p);
+    			current = p;
+    			while(nextP.isStandard() && next < ns.getPoints().size()) {
+    				for(Group g : GT) {
+    	    			for(Trajectory st : g.getTrajectories()) {
+    	    				if(!st.isLowerBoundAngle(current, nextP, distance, 30.0)) {
+    	    					nextP.setStandard(false);
+    							break;
+    	    				}
+    	    				if(!nextP.isStandard()) break;
+    	    			}
+    	    			if(!nextP.isStandard()) break;
+    	    		}
+    				if(nextP.isStandard()) break;
+    				current = nextP;
+    				nextP = ns.getPoints().get(next);
+    				next++;
+    			}
     		}
     	}
-    	if(segment.size() > 1) {
-			Trajectory t = new Trajectory();
-			t.setPoints(segment);
-			t.initialize();
-			if(isStd)
-				route.getStandards().add(t);
-			else
-				route.getNotStandards().add(t);
-		}
+    	
+    	Trajectory t = new Trajectory();
+    	t.getPoints().add(ns.getPoints().get(0));
+    	for(int i = 1; i < ns.getPoints().size(); i++) {
+    		Point curr = ns.getPoints().get(i);
+    		Point prev = ns.getPoints().get(i - 1);
+    		if(curr.isStandard() != prev.isStandard()) {
+    			if(prev.isStandard()) {
+    				route.getStandards().add(t);
+    			} else {
+    				route.getNotStandards().add(t);
+    			}
+    			t = new Trajectory();
+    			Point temp = new Point(prev.getHour(), prev.getMinutes(), prev.getLat(), prev.getLng(), prev.getTimestamp());
+    			temp.setStandard(curr.isStandard());
+    			t.getPoints().add(temp);
+    		}
+    		t.getPoints().add(curr);
+    	}
+    	if(!t.getPoints().isEmpty()) {
+    		if(t.getPoints().get(0).isStandard()) {
+    			route.getStandards().add(t);
+    		} else {
+    			route.getNotStandards().add(t);
+    		}
+    	}
+    	
     	return route;
     }
     

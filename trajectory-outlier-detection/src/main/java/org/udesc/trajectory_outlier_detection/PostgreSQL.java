@@ -195,7 +195,7 @@ public class PostgreSQL {
 				point.setTimestamp(Long.valueOf(pointDB[2]));
 				trajectory.getPoints().add(point);
 			}
-			trajectory.initialize();
+			trajectory.initialize(true);
 			trajectory.interpolate(0.0003);
 			trajectory.initialize(true);
 			trajectories.add(trajectory);

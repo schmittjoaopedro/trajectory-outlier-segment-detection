@@ -9,6 +9,8 @@ import java.util.List;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
+import com.goebl.simplify.Simplify;
+
 public class Trajectory implements Serializable {
 
 	/**
@@ -70,14 +72,14 @@ public class Trajectory implements Serializable {
 		this.binaryPointsLat = temp.toArray(new Point[] {});
 	}
 	
-	public boolean binarySearch(Point p, double distance) {
+	public Point binarySearch(Point p, double distance) {
 		int low = 0;
 		int middle = 0;
 		int high = this.binaryPointsLat.length - 1;
 		while(high >= low) {
 			middle = (low + high) / 2;
 			if(this.binaryPointsLat[middle].calculateDistance(p) <= distance) {
-				return true;
+				return this.binaryPointsLat[middle];
 			}
 			if(this.binaryPointsLat[middle].getLat() < p.getLat()) {
 				low = middle + 1;
@@ -91,83 +93,35 @@ public class Trajectory implements Serializable {
 			double dist = 0;
 			while(dist < distance && min >= 0) {
 				dist = Math.abs(this.binaryPointsLat[min].getLat() - p.getLat());
-				if(dist <= distance) {
-					if(this.binaryPointsLat[min].calculateDistance(p) <= distance)
-						return true; 
+				if(dist <= distance && this.binaryPointsLat[min].calculateDistance(p) <= distance) {
+					return this.binaryPointsLat[min];
 				}
 				min--;
 			}
 			dist = 0;
 			while(dist < distance && max < this.binaryPointsLat.length) {
 				dist = Math.abs(this.binaryPointsLat[max].getLat() - p.getLat());
-				if(dist <= distance) {
-					if(this.binaryPointsLat[max].calculateDistance(p) <= distance)
-						return true; 
+				if(dist <= distance && this.binaryPointsLat[max].calculateDistance(p) <= distance) {
+					return this.binaryPointsLat[max]; 
 				}
 				max++;
 			}
 		}
 		
-		return false;
+		return null;
 	}
 	
-	public boolean isInStandardPath(Trajectory t, Point p, double distance, double degree) {
-		int low = 0;
-		int middle = 0;
-		int high = this.binaryPointsLat.length - 1;
-		Point point = null;
-		
-		while(high >= low) {
-			middle = (low + high) / 2;
-			if(this.binaryPointsLat[middle].calculateDistance(p) <= distance) {
-				point = this.binaryPointsLat[middle];
-				break;
-			}
-			if(this.binaryPointsLat[middle].getLat() < p.getLat()) {
-				low = middle + 1;
-			} else {
-				high = middle - 1;
-			}
-		}
-		if(middle != 0) {
-			int min = middle, max = middle;
-			double dist = 0;
-			while(dist < distance && point == null && min >= 0) {
-				dist = Math.abs(this.binaryPointsLat[min].getLat() - p.getLat());
-				if(dist <= distance) {
-					if(this.binaryPointsLat[min].calculateDistance(p) <= distance)
-						point = this.binaryPointsLat[min]; 
-				}
-				min--;
-			}
-			if(point == null) {
-				dist = 0;
-				while(dist < distance && point == null && max < this.binaryPointsLat.length) {
-					dist = Math.abs(this.binaryPointsLat[max].getLat() - p.getLat());
-					if(dist <= distance) {
-						if(this.binaryPointsLat[max].calculateDistance(p) <= distance)
-							point = this.binaryPointsLat[max]; 
-					}
-					max++;
-				}
-			}
-		}
-		if(point != null) {		
-			int idx = this.getPoints().indexOf(point);
-			int pIdx = t.getPoints().indexOf(p);
-			if(idx < this.getPoints().size() - 1 && pIdx < t.getPoints().size() - 1) {
-				Point next = this.getPoints().get(idx + 1);
-				Point tNext = t.getPoints().get(pIdx + 1);
-				double diff = Math.abs(
-						Math.toDegrees(Math.atan2(next.getLat() - point.getLat(), next.getLng() - point.getLng())) - 
-						Math.toDegrees(Math.atan2(tNext.getLat() - p.getLat(), tNext.getLng() - p.getLng())));
-				if(diff > degree) {
-					return false;
-				}
-			}
+	public boolean isLowerBoundAngle(Point p1Out, Point p2Out, double distance, double angle) {
+		Point p1In = this.binarySearch(p1Out, distance);
+		Point p2In = this.binarySearch(p2Out, distance);
+		if(p1In == p2In) {
 			return true;
-		} else {
+		} else if(p1In != null && p2In != null) {
+			return this.getAngle(p1Out, p2Out, p1In, p2In) <= angle;
+		} else if((p1In == null && p2In != null) || (p1In != null && p2In == null)) {
 			return false;
+		} else {
+			return true;
 		}
 	}
 	
@@ -230,6 +184,18 @@ public class Trajectory implements Serializable {
 		}
 	}
 	
+	public void compress(double tolerance, boolean highQuality) {
+		Simplify<Point> simplify = new Simplify<Point>(new Point[0]);
+		Point[] lessPoints = simplify.simplify(points.toArray(new Point[] {}), tolerance, highQuality);
+		this.points = new ArrayList<Point>();
+		for(Point p : lessPoints) {
+			if(p != null) {
+				this.points.add(p);
+			}
+		}
+		this.initialize();
+	}
+	
 	public String toStringDefault() {
 		String STstr = "drawPoints([";
 		for(int i = 0; i < this.getPoints().size(); i++) {
@@ -254,6 +220,27 @@ public class Trajectory implements Serializable {
 		}
 		STstr += "], '#0000FF');";
 		return STstr;
+	}
+	
+	public double getAngle(Point p1s, Point p1e, Point p2s, Point p2e) {
+
+		double a1 = Math.toDegrees(Math.atan2(p1s.getLat() - p1e.getLat(), p1s.getLng() - p1e.getLng()));
+		double a2 = Math.toDegrees(Math.atan2(p2s.getLat() - p2e.getLat(), p2s.getLng() - p2e.getLng()));
+		
+		if(a1  < 0) {
+			a1 = 180 + a1;
+		}
+		if(a2  < 0) {
+			a2 = 180 + a2;
+		}
+		
+		double diff = Math.abs(a1 - a2);
+		
+		if(diff > 90) {
+			diff = 180 - 90;
+		}
+		
+		return diff;
 	}
 	
 }
