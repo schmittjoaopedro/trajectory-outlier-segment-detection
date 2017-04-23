@@ -1,4 +1,4 @@
-package org.udesc.trajectory_outlier_detection.extractors;
+package org.udesc.trajectory_outlier_detection.webapp;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,25 +8,19 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.udesc.trajectory_outlier_detection.Point;
 import org.udesc.trajectory_outlier_detection.Trajectory;
 
-public class GeoLifeExtractor {
+public class JoinvilleExtractor {
 
 	String url = "jdbc:postgresql://localhost:5432/nyc";
 	String user = "udesc";
 	String password = "udesc";
-	
-	private Connection getConn() throws SQLException {
-		return DriverManager.getConnection(url, user, password);
-	}
+	String tableName = "trajectory_application";
 	
 	public void loadTrajectories(String path) {
 		try {
@@ -40,22 +34,41 @@ public class GeoLifeExtractor {
 					FileReader fileReader = new FileReader(file);
 					BufferedReader bufferedReader = new BufferedReader(fileReader);
 					String line;
-					int lineCount = 0;
-					DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+					int indexLat = -1, indexLng = -1, indexHour = -1, indexMinute = -1, indexTime = -1;
+					boolean fileHeaderProcessed = false;
 					while ((line = bufferedReader.readLine()) != null) {
-						if(lineCount == 6) {
-							String data[] = line.split(",");
-							Double lat = Double.valueOf(data[0]);
-							Double lng = Double.valueOf(data[1]);
-							LocalDateTime date = LocalDateTime.parse(data[5] + " " + data[6], format);
+						if (!fileHeaderProcessed && line.length() > 0) {
+							String lineS[] = line.split(";");
+							for(int k = 0; k < lineS.length; k++) {
+								if("latitude".equals(lineS[k].toLowerCase()))
+									indexLat = k;
+								if("longitude".equals(lineS[k].toLowerCase()))
+									indexLng = k;
+								if("hour".equals(lineS[k].toLowerCase()))
+									indexHour = k;
+								if("minute".equals(lineS[k].toLowerCase()))
+									indexMinute = k;
+								if("time_since_start_in_ms".equals(lineS[k].toLowerCase()))
+									indexTime = k;
+							}
+							fileHeaderProcessed = true;
+						} else if (fileHeaderProcessed && line.length() > 0) {
+							String[] lineS = line.split(";");
+							int size = lineS.length - 1;
+							LocalDateTime date = LocalDateTime.of(
+									Integer.valueOf(lineS[size - 7]), 
+									Integer.valueOf(lineS[size - 6]), 
+									Integer.valueOf(lineS[size - 5]), 
+									Integer.valueOf(lineS[size - 4]), 
+									Integer.valueOf(lineS[size - 3]), 
+									Integer.valueOf(lineS[size - 2]), 
+									Integer.valueOf(lineS[size - 1]));
 							trajectory.getPoints().add(new Point(
-									date.getHour(), 
-									date.getMinute(), 
-									lat, 
-									lng, 
+									Integer.valueOf(lineS[indexHour]),
+									Integer.valueOf(lineS[indexMinute]), 
+									Double.valueOf(lineS[indexLat]),
+									Double.valueOf(lineS[indexLng]),
 									Timestamp.valueOf(date).getTime()));
-						} else {
-							lineCount++;
 						}
 					}
 					trajectory.initialize();
@@ -82,9 +95,11 @@ public class GeoLifeExtractor {
 				ts.append(t.getPoints().get(i).getLng()).append(" ").append(t.getPoints().get(i).getLat()).append(" ").append(t.getPoints().get(i).getTimestamp()).append(",");
 			}
 		}
-		String insert = "INSERT INTO trajectory_geolife (name, trajectory) VALUES ('"
-				+ t.getName() + "', ST_GeomFromEWKT('SRID=4326;MULTIPOINTM("
-						+ ts.toString() + ")'));";
+		String insert = "INSERT INTO " + tableName + " (name, country, state, city, start_hour, start_minute, trajectory) VALUES ('"
+				+ t.getName() + "','Brazil','SC','Massaranduba'," +
+				t.getPoints().get(0).getHour() + "," + 
+				t.getPoints().get(0).getMinutes() + 
+				", ST_GeomFromEWKT('SRID=4326;MULTIPOINTM(" + ts.toString() + ")'));";
 		
 		Connection conn = this.getConn();
 		conn.setAutoCommit(false);
@@ -95,10 +110,13 @@ public class GeoLifeExtractor {
 		conn.close();
 	}
 	
+	private Connection getConn() throws SQLException {
+		return DriverManager.getConnection(url, user, password);
+	}
 	
 	public static void main(String[] args) {
-		GeoLifeExtractor geoLife = new GeoLifeExtractor();
-		geoLife.loadTrajectories("/home/joao/Área de Trabalho/Mestrado/Extracted/geolife/Geolife Trajectories 1.3/Data/000/Trajectory");
+		JoinvilleExtractor joinvilleExtractor = new JoinvilleExtractor();
+		joinvilleExtractor.loadTrajectories("/home/joao/Área de Trabalho/Mestrado/Extracted/tidy/ALL");
 	}
 	
 }

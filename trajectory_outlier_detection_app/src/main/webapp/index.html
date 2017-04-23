@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Simple Map</title>
+	    <meta name="viewport" content="initial-scale=1.0">
+	    <meta charset="utf-8">
+	    <style>
+	      /* Always set the map height explicitly to define the size of the div
+	       * element that contains the map. */
+	      #map {
+	        height: 100%;
+	      }
+	      #configurations {
+	      	margin: 10px 10px 10px 10px;
+	      }
+	      input {
+	      	width: 100px;
+	      }
+	      select {
+	      	width: 100px;
+	      }	      
+	      /* Optional: Makes the sample page fill the window. */
+	      html, body {
+	        height: 100%;
+	        margin: 0;
+	        padding: 0;
+	      }
+	    </style>
+	</head>
+	<body>
+		<div id="configurations">
+			<span>
+				<label>kStandard:</label> 
+				<input type="text" id="kStandard" />
+			</span>
+			<span>
+				<label>Distance:</label> 
+				<input type="text" id="distance" />
+			</span>
+			<span>
+				<label>Angle:</label>
+				<input type="text" id="angle" />
+			</span>
+			<span>
+				<label>Country:</label>
+				<select id="country">
+					<option>Brazil</option>
+					<option>EUA</option>
+				</select>
+			</span>			
+			<span>
+				<label>State:</label>
+				<select id="state">
+					<option>SC</option>
+					<option>CA</option>
+				</select>
+			</span>
+			<span>
+				<label>City:</label>
+				<select id="city">
+					<option>Joinville</option>
+					<option>San Francisco</option>
+				</select>
+			</span>
+			<span>
+				<label>Start Hour</label>
+				<select id="startHour">
+					<option>0</option>
+					<option>1</option>
+					<option>2</option>
+					<option>3</option>
+					<option>4</option>
+					<option>5</option>
+					<option>6</option>
+					<option>7</option>
+					<option>8</option>
+					<option>9</option>
+					<option>10</option>
+					<option>11</option>
+					<option>12</option>
+					<option>13</option>
+					<option>14</option>
+					<option>15</option>
+					<option>16</option>
+					<option>17</option>
+					<option>18</option>
+					<option>19</option>
+					<option>20</option>
+					<option>21</option>
+					<option>22</option>
+					<option>23</option>
+				</select>
+			</span>
+			<span>
+				<label>End Hour</label>
+				<select id="endHour">
+					<option>0</option>
+					<option>1</option>
+					<option>2</option>
+					<option>3</option>
+					<option>4</option>
+					<option>5</option>
+					<option>6</option>
+					<option>7</option>
+					<option>8</option>
+					<option>9</option>
+					<option>10</option>
+					<option>11</option>
+					<option>12</option>
+					<option>13</option>
+					<option>14</option>
+					<option>15</option>
+					<option>16</option>
+					<option>17</option>
+					<option>18</option>
+					<option>19</option>
+					<option>20</option>
+					<option>21</option>
+					<option>22</option>
+					<option>23</option>
+				</select>
+			</span>
+			<span>
+				<button onclick="drawStartRec();">START</button>
+			</span>
+			<span>
+				<button onclick="drawEndRec();">END</button>
+			</span>
+			<span>
+				<button onclick="getTrajectories();">SEND</button>
+			</span>
+			<span>
+				<button onclick="clearMap();">CLEAR</button>
+			</span>
+		</div>
+		<div id="map"></div>
+		<script type="text/javascript" src="jquery.js"></script>
+	    <script type="text/javascript" src="app.js"></script>
+	    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBgkHA5_vNU7LySWusnD6INcO30iR37GqE&callback=initMap&libraries=drawing" async defer></script>
+	    <script type="text/javascript" src="service.js"></script>
+	</body>	 
+</html>

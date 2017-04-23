@@ -22,14 +22,19 @@ ALTER USER udesc WITH SUPERUSER;
 
 
 =============== exemplo ===============
-CREATE TABLE TRAJECTORY_TEST (
+CREATE TABLE TRAJECTORY_APPLICATION (
 	id SERIAL PRIMARY KEY,
-	name VARCHAR(200),
+	name VARCHAR(200) NOT NULL,
+	country VARCHAR(200) NOT NULL,
+	state VARCHAR(200) NOT NULL,
+	city VARCHAR(200) NOT NULL,
+	start_hour INT NOT NULL,
+	start_minute INT  NOT NULL,
 	trajectory GEOGRAPHY(MULTIPOINTM, 4326)
 );
 
-INSERT INTO trajectory_test (name, trajectory) VALUES ('Teste1', ST_GeomFromEWKT('SRID=4326;MULTIPOINTM(0 0 0,1 2 1)'));
+INSERT INTO TRAJECTORY_APPLICATION (name, trajectory) VALUES ('Teste1', ST_GeomFromEWKT('SRID=4326;MULTIPOINTM(0 0 0,1 2 1)'));
 
-CREATE INDEX trajectory_test_gix ON trajectory_test USING GIST ( trajectory );
+CREATE INDEX TRAJECTORY_APPLICATION_GIX ON TRAJECTORY_APPLICATION USING GIST ( trajectory );
 
-SELECT name, ST_AsText(trajectory) from trajectory_test;
+SELECT name, ST_AsText(trajectory) from TRAJECTORY_APPLICATION;

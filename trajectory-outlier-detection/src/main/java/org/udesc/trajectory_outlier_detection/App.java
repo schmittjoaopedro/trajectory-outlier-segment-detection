@@ -86,6 +86,8 @@ public class App {
 //    		}
 //    	}
     	
+    	calculateRegions(283,438);
+    	
 //    	Joinville
 //    	calculateRegions(554,526);
     	
