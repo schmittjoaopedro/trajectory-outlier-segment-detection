@@ -52,7 +52,7 @@ public class Trajectory implements Serializable {
 	public void initialize(boolean removeOuliers) {
 		Collections.sort(this.getPoints(), new Comparator<Point>() {
 			public int compare(Point o1, Point o2) {
-				return (int) (o2.getTimestamp() - o1.getTimestamp());
+				return (int) (o1.getTimestamp() - o2.getTimestamp());
 			}
 		});
 		if(removeOuliers) {

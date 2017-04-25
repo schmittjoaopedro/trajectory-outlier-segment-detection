@@ -26,6 +26,10 @@ public class TODS {
 		CalculationResult calculationResult = new CalculationResult();
 		Long startTime = System.currentTimeMillis();
 		List<Trajectory> candidates = trajectoryBase.findTrajectories(request.getCountry(), request.getState(), request.getCity(), request.getStartHour(), request.getEndHour(), request.getStartGrid(), request.getEndGrid());
+		for(Trajectory trajectory : candidates) {
+			trajectory.filterNoise(request.getSigma(), request.getSd());
+			trajectory.interpolate(request.getInterpolation());
+		}
 		candidates = this.getCandidatesTrajectories(candidates, request.getStartGrid(), request.getEndGrid(), request.getStartHour(), request.getEndHour());
 		calculationResult.setTrajectoriesAnalysed(candidates.size());
 		calculationResult.setQueryTime(System.currentTimeMillis() - startTime);

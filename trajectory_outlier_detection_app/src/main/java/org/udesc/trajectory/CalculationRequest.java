@@ -35,6 +35,12 @@ public class CalculationRequest implements Serializable {
 	
 	private int kStandard;
 	
+	private double interpolation;
+	
+	private double sd;
+	
+	private double sigma;
+	
 	public CalculationRequest() {
 		super();
 	}
@@ -117,6 +123,30 @@ public class CalculationRequest implements Serializable {
 
 	public void setAngle(double angle) {
 		this.angle = angle;
+	}
+
+	public double getInterpolation() {
+		return interpolation;
+	}
+
+	public void setInterpolation(double interpolation) {
+		this.interpolation = interpolation;
+	}
+
+	public double getSd() {
+		return sd;
+	}
+
+	public void setSd(double sd) {
+		this.sd = sd;
+	}
+
+	public double getSigma() {
+		return sigma;
+	}
+
+	public void setSigma(double sigma) {
+		this.sigma = sigma;
 	}
 	
 }

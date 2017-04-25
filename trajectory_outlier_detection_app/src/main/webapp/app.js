@@ -17,11 +17,8 @@ if (typeof (Number.prototype.toRad) === "undefined") {
 
 function initMap() {
 	map = new google.maps.Map(document.getElementById('map'), {
-		center : {
-			lat : -26.295199,
-			lng : -48.847915
-		}, // Joinville
-		// center: {lat: 37.746015, lng: -122.362731}, //Uber
+		center:{lat:-26.295199,lng:-48.847915}, // Joinville
+		//center: {lat: 37.746015, lng: -122.362731}, //Uber
 		scrollwheel : true,
 		zoom : 12
 	});
@@ -171,6 +168,10 @@ function clearMap() {
 }
 
 function getTrajectories() {
+	for (var i = 0; i < polylines.length; i++) {
+		polylines[i].setMap(null);
+	}
+	polylines = [];
 	var req = {
 		country : $('#country').val(),
 		state : $('#state').val(),
@@ -181,7 +182,10 @@ function getTrajectories() {
 		angle : $('#angle').val(),
 		kStandard : $('#kStandard').val(),
 		startGrid : regionStart,
-		endGrid : regionEnd
+		endGrid : regionEnd,
+		interpolation: $('#interpolation').val(),
+		sigma: $('#sigma').val(),
+		sd: $('#sd').val()
 	};
 	$.ajax({
 		type : "POST",
@@ -220,3 +224,6 @@ $('#endHour').val("23");
 $('#distance').val("0.0003");
 $('#angle').val("30.0");
 $('#kStandard').val("1");
+$('#interpolation').val("0.0003");
+$('#sd').val("0.001");
+$('#sigma').val("0.0015");
