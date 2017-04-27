@@ -10,7 +10,7 @@ import org.udesc.trajectory.Grid;
 import org.udesc.trajectory.Point;
 import org.udesc.trajectory.Trajectory;
 
-public class TrajectoryBase extends Database {
+public class TrajectoryPostGreeBase extends Database {
 	
 	private static final String TRAJECTORY_SQL = "select " +
 			"tt.name,  " +

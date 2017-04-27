@@ -18,6 +18,11 @@ import java.util.Map;
 import org.udesc.trajectory_outlier_detection.Point;
 import org.udesc.trajectory_outlier_detection.Trajectory;
 
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCollection;
+import com.mongodb.MongoClient;
+
 public class UberExtractor {
 	
 	private String url = "jdbc:postgresql://localhost:5432/nyc";
@@ -26,6 +31,8 @@ public class UberExtractor {
 
 	private String password = "udesc";
 
+	MongoClient mongoClient;
+	
 	private Map<Integer, Trajectory> trajectories = new HashMap<Integer, Trajectory>();
 	
 	public void loadTrajectories(String path) {
@@ -66,7 +73,7 @@ public class UberExtractor {
 			bufferedReader.close();
 			for(Trajectory t : trajectories.values()) {
 				t.initialize();
-				loadTrajectory(t);
+				loadTrajectoryMongo(t);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -97,12 +104,55 @@ public class UberExtractor {
 		conn.close();
 	}
 	
+	public void loadTrajectoryMongo(Trajectory t) throws Exception {
+		DBCollection db = this.getDatabase();
+		
+		BasicDBObject trajectory = new BasicDBObject();
+		trajectory.put("type", "LineString");
+		BasicDBList points = new BasicDBList();
+		for(Point p : t.getPoints()) {
+			BasicDBList pts = new BasicDBList();
+			pts.add(p.getLng());
+			pts.add(p.getLat());
+			points.add(pts);
+		}
+		trajectory.put("coordinates", points);
+		
+		BasicDBList pointsFull = new BasicDBList();
+		for(Point p : t.getPoints()) {
+			BasicDBList pts = new BasicDBList();
+			pts.add(p.getLng());
+			pts.add(p.getLat());
+			pts.add(p.getTimestamp());
+			pointsFull.add(pts);
+		}
+		
+		BasicDBObject document = new BasicDBObject();
+		document.put("name", t.getName());
+		document.put("country", "EUA");
+		document.put("state", "CA");
+		document.put("city", "San Francisco");
+		document.put("start_hour", t.getPoints().get(0).getHour());
+		document.put("start_minute", t.getPoints().get(0).getMinutes());
+		document.put("trajectory", trajectory);
+		document.put("points", pointsFull);
+		
+		db.insert(document);
+	}
+	
 	private Connection getConn() throws SQLException {
 		return DriverManager.getConnection(url, user, password);
 	}
 	
 	public List<Trajectory> getTrajectories() {
 		return new ArrayList<Trajectory>(this.trajectories.values());
+	}
+	
+	private DBCollection getDatabase() {
+		if(this.mongoClient == null) {
+			this.mongoClient = new MongoClient("localhost", 27017);
+		}
+		return this.mongoClient.getDB("udesc").getCollection("trajectories");
 	}
 	
 	public static void main(String[] args) {

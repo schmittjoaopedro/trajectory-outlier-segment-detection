@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.udesc.database.TrajectoryBase;
+import org.udesc.database.TrajectoryMongoDB;
 
 /**
  * Trajectory outlier detection and segmentation - TODS
@@ -15,11 +15,11 @@ import org.udesc.database.TrajectoryBase;
  */
 public class TODS {
 
-	private TrajectoryBase trajectoryBase;
+	private TrajectoryMongoDB trajectoryBase;
 	
 	public TODS() {
 		super();
-		trajectoryBase = new TrajectoryBase();
+		trajectoryBase = new TrajectoryMongoDB();
 	}
 	
 	public CalculationResult run(CalculationRequest request) throws Exception {

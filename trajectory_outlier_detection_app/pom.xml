@@ -56,6 +56,12 @@
 			<artifactId>resteasy-jackson2-provider</artifactId>
 			<version>3.1.2.Final</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.mongodb/mongo-java-driver -->
+		<dependency>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>3.4.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>
