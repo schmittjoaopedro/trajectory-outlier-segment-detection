@@ -95,14 +95,7 @@ public class TODS {
     		}
     	}
     	if (start < end && start != -1 && end != -1) {
-    		List<Point> points = trajectory.getPoints().subList(start, end);
-    		subT.getPoints().addAll(points);
-    		for(Point p : points) {
-    			if  ((gS.betweenLat(p) && gS.betweenLng(p)) ||
-    				(gE.betweenLat(p) && gE.betweenLng(p))) {
-    				subT.getPoints().remove(p);
-    			}
-    		}
+    		subT.getPoints().addAll(trajectory.getPoints().subList(start, end + 1));
     	} else {
     		return null;
     	}
