@@ -39,9 +39,14 @@ public class TODS {
 			if(!groups.isEmpty()) {
 				List<Group> standard = this.getStandardTrajectories(groups, request.getkStandard());
 				if(!standard.isEmpty()) {
-					List<Route> routes = this.getNotStandardTrajectories(groups, standard, request.getDistance(), request.getAngle());
-					if(!routes.isEmpty()) {
-						calculationResult.setRoutes(routes);
+					List<Group> notStandards = this.getNotStandardTrajectories(groups, standard, request.getDistance(), request.getAngle());
+					if(!notStandards.isEmpty()) {
+						Collections.sort(notStandards, new Comparator<Group>() {
+							public int compare(Group o1, Group o2) {
+								return (int) (o2.getTrajectories().size() - o1.getTrajectories().size());
+							}
+						});
+						calculationResult.setNotStandards(notStandards);
 					}
 					calculationResult.setStandards(standard);
 				}
@@ -142,23 +147,24 @@ public class TODS {
     	return groups.subList(0, k);
     }
 	
-	public List<Route> getNotStandardTrajectories(List<Group> GT, List<Group> STG, double distance, double angle) {
+	public List<Group> getNotStandardTrajectories(List<Group> GT, List<Group> STG, double distance, double angle) {
     	List<Group> NSG = new ArrayList<Group>();
-    	List<Route> routes = new ArrayList<Route>();
     	for(Group g : GT) {
     		if(!STG.contains(g)) {
     			NSG.add(g);
     		}
     	}
     	for(Group ns : NSG) {
+    		List<Route> routes = new ArrayList<>();
     		for(Trajectory t : ns.getTrajectories()) {
     			Route route = this.getNotStandardTrajectoriesSegments(t, STG, distance, angle);
     			if(route != null) {
     				routes.add(route);
     			}
     		}
+    		ns.setRoutes(routes);
     	}
-    	return routes;
+    	return NSG;
     }
 	
 	public Route getNotStandardTrajectoriesSegments(Trajectory ns, List<Group> GT, double distance, double angle) {

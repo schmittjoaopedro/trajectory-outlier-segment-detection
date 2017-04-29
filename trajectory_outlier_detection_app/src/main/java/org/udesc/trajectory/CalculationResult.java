@@ -21,7 +21,7 @@ public class CalculationResult implements Serializable {
 	
 	private List<Group> standards;
 	
-	private List<Route> routes;
+	private List<Group> notStandards;
 	
 	private long queryTime;
 	
@@ -64,13 +64,13 @@ public class CalculationResult implements Serializable {
 		this.standards = standards;
 	}
 
-	public List<Route> getRoutes() {
-		if(routes == null) routes = new ArrayList<Route>();
-		return routes;
+	public List<Group> getNotStandards() {
+		if(notStandards == null) notStandards = new ArrayList<>();
+		return notStandards;
 	}
 
-	public void setRoutes(List<Route> routes) {
-		this.routes = routes;
+	public void setNotStandards(List<Group> notStandards) {
+		this.notStandards = notStandards;
 	}
 	
 }
