@@ -273,7 +273,7 @@ public class Trajectory implements Serializable {
 			if(a1  < 0) a1 = 180 + a1;
 			if(a2  < 0) a2 = 180 + a2;			
 			double diff = Math.abs(a1 - a2);
-			if(diff > 90) diff = 180 - 90;
+			if(diff > 90) diff = 180 - diff;
 			return diff <= angle;
 		} else if((p1In == null && p2In != null) || (p1In != null && p2In == null)) {
 			return false;
