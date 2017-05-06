@@ -1,4 +1,4 @@
-package org.udesc.trajectory;
+package org.udesc.trajectory.TODS;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,15 +22,16 @@ public class TODS {
 		trajectoryBase = new TrajectoryMongoDB();
 	}
 	
-	public CalculationResult run(CalculationRequest request) throws Exception {
-		CalculationResult calculationResult = new CalculationResult();
+	@SuppressWarnings("unchecked")
+	public TODSResult run(TODSRequest request) throws Exception {
+		TODSResult calculationResult = new TODSResult();
 		Long startTime = System.currentTimeMillis();
-		List<Trajectory> candidates = trajectoryBase.findTrajectories(request.getCountry(), request.getState(), request.getCity(), request.getStartHour(), request.getEndHour(), request.getStartGrid(), request.getEndGrid());
+		List<Trajectory> candidates = (List<Trajectory>) trajectoryBase.findTrajectories(request.getCountry(), request.getState(), request.getCity(), request.getStartHour(), request.getEndHour(), request.getStartGrid(), request.getEndGrid(), Trajectory.class, Point.class);
 		for(Trajectory trajectory : candidates) {
 			trajectory.filterNoise(request.getSigma(), request.getSd());
 			trajectory.interpolate(request.getInterpolation());
 		}
-		candidates = this.getCandidatesTrajectories(candidates, request.getStartGrid(), request.getEndGrid(), request.getStartHour(), request.getEndHour());
+		candidates = this.getCandidatesTrajectories(candidates, request.getStartGrid(), request.getEndGrid(), request.getStartHour(), request.getEndHour(), calculationResult);
 		calculationResult.setTrajectoriesAnalysed(candidates.size());
 		calculationResult.setQueryTime(System.currentTimeMillis() - startTime);
 		startTime = System.currentTimeMillis();
@@ -56,7 +57,7 @@ public class TODS {
 		return calculationResult;
 	}
 	
-	public List<Trajectory> getCandidatesTrajectories(List<Trajectory> trajectories, Grid gridStart, Grid gridEnd, double tStart, double tEnd) throws Exception {
+	public List<Trajectory> getCandidatesTrajectories(List<Trajectory> trajectories, Grid gridStart, Grid gridEnd, double tStart, double tEnd, TODSResult result) throws Exception {
     	List<Trajectory> subTrajectories = new ArrayList<Trajectory>();
     	for(Trajectory trajectory : trajectories) {
     		Trajectory subTrajectory = this.getSubTrajectory(trajectory, gridStart, gridEnd);
@@ -64,6 +65,7 @@ public class TODS {
     				tStart <= subTrajectory.getPoints().get(0).getHour() &&
     				subTrajectory.getPoints().get(subTrajectory.getPoints().size() - 1).getHour() <= tEnd) {
     			subTrajectories.add(subTrajectory);
+    			result.getRawResult().add(trajectory);
     			for(Point p : subTrajectory.getPoints()) {
     				p.setStandard(false);
     			}

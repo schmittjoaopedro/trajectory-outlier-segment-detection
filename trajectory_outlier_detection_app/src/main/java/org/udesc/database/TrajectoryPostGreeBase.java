@@ -6,10 +6,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.udesc.trajectory.Grid;
-import org.udesc.trajectory.Point;
-import org.udesc.trajectory.Trajectory;
-
 public class TrajectoryPostGreeBase extends Database {
 	
 	private static final String TRAJECTORY_SQL = "select " +
@@ -32,7 +28,7 @@ public class TrajectoryPostGreeBase extends Database {
 			"tt.start_hour >= #START_HOUR and  " +
 			"tt.start_hour <= #END_HOUR ";
 	
-	public List<Trajectory> findTrajectories(String country, String state, String city, int startHour, int endHour, Grid st, Grid en) throws Exception {
+	public List<ITrajectory<IPoint>> findTrajectories(String country, String state, String city, int startHour, int endHour, IGrid st, IGrid en, Class<? extends ITrajectory<IPoint>> trajectoryClazz, Class<IPoint> pointClazz) throws Exception {
 		StringBuilder start = new StringBuilder();
 		start.append(st.getLngMin()).append(" ").append(st.getLatMin()).append(",")
 		.append(st.getLngMin()).append(" ").append(st.getLatMax()).append(",")
@@ -55,13 +51,13 @@ public class TrajectoryPostGreeBase extends Database {
 				.replace("#END_HOUR", String.valueOf(endHour))
 				.replace("#ST_REGION", start.toString())
 				.replace("#END_REGION", end.toString());			
-		List<Trajectory> trajectoriesFound = new ArrayList<Trajectory>();
+		List<ITrajectory<IPoint>> trajectoriesFound = new ArrayList<ITrajectory<IPoint>>();
 		Connection conn = this.getConn();
 		Statement stmt = conn.createStatement();
 		stmt.setFetchSize(1000);
 		ResultSet rs = stmt.executeQuery(sql.toString());
 		while(rs.next()) {
-			Trajectory trajectory = new Trajectory();
+			ITrajectory<IPoint> trajectory = trajectoryClazz.newInstance();
 			trajectory.setName(rs.getString("name"));
 			trajectory.setCity(rs.getString("city"));
 			trajectory.setState(rs.getString("state"));
@@ -73,7 +69,7 @@ public class TrajectoryPostGreeBase extends Database {
 			String pointsDB[] = trajectoryDB.split(",");
 			for(String points : pointsDB) {
 				String pointDB[] = points.split(" ");
-				Point point = new Point();
+				IPoint point = pointClazz.newInstance();
 				point.setLng(Double.valueOf(pointDB[0]));
 				point.setLat(Double.valueOf(pointDB[1]));
 				point.setTimestamp(Long.valueOf(pointDB[2]));

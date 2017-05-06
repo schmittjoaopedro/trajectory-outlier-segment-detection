@@ -207,7 +207,7 @@ function getTrajectories() {
 	$('#loadRegInf').show();
 	$.ajax({
 		type : "POST",
-		url : "/trajectory_outlier_detection_app/resources/trajectory/process",
+		url : "/trajectory_outlier_detection_app/resources/trajectory/process/TODS",
 		dataType : "json",
 		contentType : 'application/json',
 		data : JSON.stringify(req)
@@ -272,6 +272,15 @@ function showAll() {
 					}
 				});
 			}
+		});
+	}
+}
+
+function showRaw() {
+	clearTrajectories();
+	if (response.rawResult) {
+		response.rawResult.forEach(function(trajectory) {
+			drawPoints(trajectory.points, '#FF0000');
 		});
 	}
 }

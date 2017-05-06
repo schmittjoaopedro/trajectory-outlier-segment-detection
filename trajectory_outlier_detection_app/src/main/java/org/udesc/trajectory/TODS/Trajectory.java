@@ -1,4 +1,4 @@
-package org.udesc.trajectory;
+package org.udesc.trajectory.TODS;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -8,8 +8,9 @@ import java.util.List;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.udesc.database.ITrajectory;
 
-public class Trajectory implements Serializable {
+public class Trajectory implements Serializable, ITrajectory<Point> {
 
 	/**
 	 * 
@@ -36,43 +37,53 @@ public class Trajectory implements Serializable {
 		super();
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
 
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	@Override
 	public String getCity() {
 		return city;
 	}
 
+	@Override
 	public void setCity(String city) {
 		this.city = city;
 	}
 
+	@Override
 	public String getState() {
 		return state;
 	}
 
+	@Override
 	public void setState(String state) {
 		this.state = state;
 	}
 
+	@Override
 	public String getCountry() {
 		return country;
 	}
 
+	@Override
 	public void setCountry(String country) {
 		this.country = country;
 	}
 
+	@Override
 	public List<Point> getPoints() {
 		if(this.points == null) this.points = new ArrayList<Point>();
 		return points;
 	}
 
+	@Override
 	public void setPoints(List<Point> points) {
 		this.points = points;
 	}
@@ -104,6 +115,7 @@ public class Trajectory implements Serializable {
 	/**
 	 * Sort points by timestamp
 	 */
+	@Override
 	public void sortPoints() {
 		Collections.sort(this.getPoints(), new Comparator<Point>() {
 			public int compare(Point o1, Point o2) {

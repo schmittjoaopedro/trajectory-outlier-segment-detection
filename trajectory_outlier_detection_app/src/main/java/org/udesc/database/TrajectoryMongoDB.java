@@ -3,10 +3,6 @@ package org.udesc.database;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.udesc.trajectory.Grid;
-import org.udesc.trajectory.Point;
-import org.udesc.trajectory.Trajectory;
-
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -15,7 +11,8 @@ import com.mongodb.DBObject;
 
 public class TrajectoryMongoDB extends Database {
 
-	public List<Trajectory> findTrajectories(String country, String state, String city, int startHour, int endHour, Grid st, Grid en) throws Exception {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public List findTrajectories(String country, String state, String city, int startHour, int endHour, IGrid st, IGrid en, Class<? extends ITrajectory> trajectoryClazz, Class<? extends IPoint> pointClazz) throws Exception {
 		DBCollection collection = this.getDatabase();
 		
 		BasicDBObject query = new BasicDBObject();
@@ -35,12 +32,12 @@ public class TrajectoryMongoDB extends Database {
 		and.add(this.createRegionQuery(en));
 		query.put("$and", and);
 		
-		List<Trajectory> trajectoriesFound = new ArrayList<Trajectory>();
+		List<ITrajectory> trajectoriesFound = new ArrayList<ITrajectory>();
 		
 		DBCursor cursor = collection.find(query);
 		while (cursor.hasNext()) {
 			DBObject object = cursor.next();
-			Trajectory t = new Trajectory();
+			ITrajectory t = trajectoryClazz.newInstance();
 			t.setName(String.valueOf(object.get("name")));
 			t.setCountry(String.valueOf(object.get("country")));
 			t.setState(String.valueOf(object.get("state")));
@@ -50,7 +47,7 @@ public class TrajectoryMongoDB extends Database {
 			BasicDBList coordinates = (BasicDBList) object.get("points");
 			for(int i = 0; i < coordinates.size(); i++) {
 				BasicDBList coordinate = (BasicDBList) coordinates.get(i);
-				Point p = new Point();
+				IPoint p = pointClazz.newInstance();
 				p.setLng((double) coordinate.get(0));
 				p.setLat((double) coordinate.get(1));
 				p.setTimestamp((long) coordinate.get(2));
@@ -63,7 +60,7 @@ public class TrajectoryMongoDB extends Database {
 		return trajectoriesFound;
 	}
 	
-	private BasicDBObject createRegionQuery(Grid grid) {
+	private BasicDBObject createRegionQuery(IGrid grid) {
 		BasicDBObject root = new BasicDBObject();
 		BasicDBObject trajectory = new BasicDBObject();
 		BasicDBObject geoIntersect = new BasicDBObject();

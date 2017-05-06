@@ -1,10 +1,12 @@
-package org.udesc.trajectory;
+package org.udesc.trajectory.TRASOD;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
 
-public class Point implements Serializable {
+import org.udesc.database.IPoint;
+
+public class Point implements Serializable, IPoint {
 	
 	/**
 	 * 
@@ -17,52 +19,47 @@ public class Point implements Serializable {
 	
 	private long timestamp;
 	
-	private boolean standard; 
-	
 	public Point() {
 		super();
 	}
 
-	public Point(double lat, double lng, long timestamp, boolean standard) {
+	public Point(double lat, double lng, long timestamp) {
 		super();
 		this.lat = lat;
 		this.lng = lng;
 		this.timestamp = timestamp;
-		this.standard = standard;
 	}
 
+	@Override
 	public double getLat() {
 		return lat;
 	}
 
+	@Override
 	public void setLat(double lat) {
 		this.lat = lat;
 	}
 
+	@Override
 	public double getLng() {
 		return lng;
 	}
 
+	@Override
 	public void setLng(double lng) {
 		this.lng = lng;
 	}
 
+	@Override
 	public long getTimestamp() {
 		return timestamp;
 	}
 
+	@Override
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
 
-	public boolean isStandard() {
-		return standard;
-	}
-
-	public void setStandard(boolean standard) {
-		this.standard = standard;
-	}
-	
 	public int getHour() {
 		return Instant.ofEpochMilli(timestamp).atZone(ZoneId.systemDefault()).toLocalDateTime().getHour();
 	}

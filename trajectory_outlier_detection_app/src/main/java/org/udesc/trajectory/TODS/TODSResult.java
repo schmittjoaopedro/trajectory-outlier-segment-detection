@@ -1,4 +1,4 @@
-package org.udesc.trajectory;
+package org.udesc.trajectory.TODS;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CalculationResult implements Serializable {
+public class TODSResult implements Serializable {
 
 	/**
 	 * 
@@ -27,7 +27,9 @@ public class CalculationResult implements Serializable {
 	
 	private long programTime;
 	
-	public CalculationResult() {
+	private List<Trajectory> rawResult;
+	
+	public TODSResult() {
 		super();
 	}
 	
@@ -71,6 +73,15 @@ public class CalculationResult implements Serializable {
 
 	public void setNotStandards(List<Group> notStandards) {
 		this.notStandards = notStandards;
+	}
+
+	public List<Trajectory> getRawResult() {
+		if(rawResult == null) rawResult = new ArrayList<>();
+		return rawResult;
+	}
+
+	public void setRawResult(List<Trajectory> rawTrajectories) {
+		this.rawResult = rawTrajectories;
 	}
 	
 }

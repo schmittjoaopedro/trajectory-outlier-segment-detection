@@ -1,4 +1,4 @@
-package org.udesc.trajectory;
+package org.udesc.trajectory.TODS;
 
 import java.io.Serializable;
 import java.util.ArrayList;

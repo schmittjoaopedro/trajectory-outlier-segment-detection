@@ -1,4 +1,4 @@
-package org.udesc.trajectory;
+package org.udesc.trajectory.TODS;
 
 import java.io.Serializable;
 
@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class CalculationRequest implements Serializable {
+public class TODSRequest implements Serializable {
 
 	/**
 	 * 
@@ -41,7 +41,7 @@ public class CalculationRequest implements Serializable {
 	
 	private double sigma;
 	
-	public CalculationRequest() {
+	public TODSRequest() {
 		super();
 	}
 
