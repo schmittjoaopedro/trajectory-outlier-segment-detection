@@ -15,6 +15,9 @@ if (typeof (Number.prototype.toRad) === "undefined") {
 	Number.prototype.toRad = function() {
 		return this * Math.PI / 180;
 	}
+	Number.prototype.toDeg = function() {
+		return this * 180 / Math.PI;
+	}
 }
 
 function initMap() {
@@ -138,6 +141,42 @@ function drawCircle(lat, lng, radius, color) {
 	circle.bindTo('center', marker, 'position');
 }
 
+function measure(distance){  // generally used geo measurement function
+	var lat1 = 0.0;
+	var lon1 = 0.0;
+	var lat2 = 0.0;
+	var lon2 = distance;
+    var R = 6378.137; // Radius of earth in KM
+    var dLat = lat2 * Math.PI / 180 - lat1 * Math.PI / 180;
+    var dLon = lon2 * Math.PI / 180 - lon1 * Math.PI / 180;
+    var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var d = R * c;
+    return d * 1000; // meters
+}
+
+function convert(meters) {
+	var distance = parseFloat(meters);
+	var minuteToMeter = 1852.0;
+	var degreeToMinute = 60.0;
+	var startPointLat = 0.0;
+	var startPointLon = 0.0;
+	var course = 0.0;
+	 
+	var crs = (course).toRad();
+	var d12 = (distance / minuteToMeter / degreeToMinute).toRad();
+	var lat1 = (startPointLat).toRad();
+	var lon1 = (startPointLon).toRad();
+
+	var lat = Math.asin(Math.sin(lat1) * Math.cos(d12) + Math.cos(lat1) * Math.sin(d12) * Math.cos(crs));
+	var dlon = Math.atan2(Math.sin(crs) * Math.sin(d12) * Math.cos(lat1), Math.cos(d12) - Math.sin(lat1) * Math.sin(lat));
+	var lon = (lon1 + dlon + Math.PI) % (2 * Math.PI) - Math.PI;
+
+	return Math.sqrt(Math.pow((lat).toDeg() - startPointLat, 2) + Math.pow((lon).toDeg() - startPointLon, 2));
+}
+
 function drawStartRec() {
 	if (!regionStart) {
 		region = 'start';
@@ -194,14 +233,14 @@ function getTrajectories() {
 		city : $('#city').val(),
 		startHour : $('#startHour').val(),
 		endHour : $('#endHour').val(),
-		distance : $('#distance').val(),
+		distance : convert($('#distance').val()),
 		angle : $('#angle').val(),
 		kStandard : $('#kStandard').val(),
 		startGrid : regionStart,
 		endGrid : regionEnd,
-		interpolation: $('#interpolation').val(),
+		interpolation: convert($('#interpolation').val()),
 		sigma: $('#sigma').val(),
-		sd: $('#sd').val()
+		sd: convert($('#sd').val())
 	};
 	$('#processBtn').removeClass('btn-outline-success').addClass('btn-success');
 	$('#loadRegInf').show();
@@ -342,11 +381,11 @@ function processResponse() {
 
 
 $('#endHour').val("23");
-$('#distance').val("0.0003");
+$('#distance').val("35");
 $('#angle').val("30.0");
 $('#kStandard').val("1");
-$('#interpolation').val("0.0003");
-$('#sd').val("0.001");
+$('#interpolation').val("35");
+$('#sd').val("100");
 $('#sigma').val("0.0015");
 $('#startRegInf').hide();
 $('#endRegInf').hide();

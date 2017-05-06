@@ -15,6 +15,9 @@ if (typeof (Number.prototype.toRad) === "undefined") {
 	Number.prototype.toRad = function() {
 		return this * Math.PI / 180;
 	}
+	Number.prototype.toDeg = function() {
+		return this * 180 / Math.PI;
+	}
 }
 
 function initMap() {
@@ -152,6 +155,26 @@ function drawStartRec() {
 	}
 }
 
+function convert(meters) {
+	var distance = parseFloat(meters);
+	var minuteToMeter = 1852.0;
+	var degreeToMinute = 60.0;
+	var startPointLat = 0.0;
+	var startPointLon = 0.0;
+	var course = 0.0;
+	 
+	var crs = (course).toRad();
+	var d12 = (distance / minuteToMeter / degreeToMinute).toRad();
+	var lat1 = (startPointLat).toRad();
+	var lon1 = (startPointLon).toRad();
+
+	var lat = Math.asin(Math.sin(lat1) * Math.cos(d12) + Math.cos(lat1) * Math.sin(d12) * Math.cos(crs));
+	var dlon = Math.atan2(Math.sin(crs) * Math.sin(d12) * Math.cos(lat1), Math.cos(d12) - Math.sin(lat1) * Math.sin(lat));
+	var lon = (lon1 + dlon + Math.PI) % (2 * Math.PI) - Math.PI;
+
+	return Math.sqrt(Math.pow((lat).toDeg() - startPointLat, 2) + Math.pow((lon).toDeg() - startPointLon, 2));
+}
+
 function drawEndRec() {
 	if (!regionEnd) {
 		region = 'end';
@@ -192,7 +215,7 @@ function getTrajectories() {
 		country : $('#country').val(),
 		state : $('#state').val(),
 		city : $('#city').val(),
-		maxDist : $('#maxDist').val(),
+		maxDist : convert($('#maxDist').val()),
 		minSup : $('#minSup').val(),
 		startGrid : regionStart,
 		endGrid : regionEnd
@@ -304,7 +327,7 @@ function processResponse() {
 }
 
 
-$('#maxDist').val("0.0003");
+$('#maxDist').val("35");
 $('#minSup').val("4");
 $('#startRegInf').hide();
 $('#endRegInf').hide();
