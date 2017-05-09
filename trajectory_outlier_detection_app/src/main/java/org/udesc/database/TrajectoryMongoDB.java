@@ -11,7 +11,7 @@ import com.mongodb.DBObject;
 
 public class TrajectoryMongoDB extends Database {
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes" })
 	public List findTrajectories(String country, String state, String city, int startHour, int endHour, IGrid st, IGrid en, Class<? extends ITrajectory> trajectoryClazz, Class<? extends IPoint> pointClazz) throws Exception {
 		DBCollection collection = this.getDatabase();
 		
@@ -32,9 +32,22 @@ public class TrajectoryMongoDB extends Database {
 		and.add(this.createRegionQuery(en));
 		query.put("$and", and);
 		
-		List<ITrajectory> trajectoriesFound = new ArrayList<ITrajectory>();
-		
 		DBCursor cursor = collection.find(query);
+		return createTrajectories(trajectoryClazz, pointClazz, cursor);
+	}
+	
+	@SuppressWarnings({ "rawtypes" })
+	public List findAll(String country, Class<? extends ITrajectory> trajectoryClazz, Class<? extends IPoint> pointClazz) throws Exception {
+		DBCollection collection = this.getDatabase();
+		BasicDBObject general = new BasicDBObject();
+		general.put("country", country);
+		DBCursor cursor = collection.find(general);
+		return createTrajectories(trajectoryClazz, pointClazz, cursor);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private List<ITrajectory> createTrajectories(Class<? extends ITrajectory> trajectoryClazz, Class<? extends IPoint> pointClazz, DBCursor cursor) throws InstantiationException, IllegalAccessException {
+		List<ITrajectory> trajectoriesFound = new ArrayList<ITrajectory>();
 		while (cursor.hasNext()) {
 			DBObject object = cursor.next();
 			ITrajectory t = trajectoryClazz.newInstance();
@@ -56,7 +69,6 @@ public class TrajectoryMongoDB extends Database {
 			t.sortPoints();
 			trajectoriesFound.add(t);
 		}
-		
 		return trajectoriesFound;
 	}
 	

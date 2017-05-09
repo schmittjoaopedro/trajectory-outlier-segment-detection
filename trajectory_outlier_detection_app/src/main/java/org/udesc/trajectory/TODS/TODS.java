@@ -24,17 +24,28 @@ public class TODS {
 	
 	@SuppressWarnings("unchecked")
 	public TODSResult run(TODSRequest request) throws Exception {
-		TODSResult calculationResult = new TODSResult();
 		Long startTime = System.currentTimeMillis();
 		List<Trajectory> candidates = (List<Trajectory>) trajectoryBase.findTrajectories(request.getCountry(), request.getState(), request.getCity(), request.getStartHour(), request.getEndHour(), request.getStartGrid(), request.getEndGrid(), Trajectory.class, Point.class);
 		for(Trajectory trajectory : candidates) {
 			trajectory.filterNoise(request.getSigma(), request.getSd());
 			trajectory.interpolate(request.getInterpolation());
 		}
-		candidates = this.getCandidatesTrajectories(candidates, request.getStartGrid(), request.getEndGrid(), request.getStartHour(), request.getEndHour(), calculationResult);
+		startTime = System.currentTimeMillis() - startTime;
+		TODSResult calculationResult = this.run(request, candidates);
+		calculationResult.setQueryTime(startTime);
+		return calculationResult;
+	}
+	
+	public TODSResult run(TODSRequest request, List<Trajectory> trajectories) throws Exception {
+		TODSResult calculationResult = new TODSResult();
+		List<Trajectory> candidates = this.getCandidatesTrajectories(trajectories, request.getStartGrid(), request.getEndGrid(), request.getStartHour(), request.getEndHour(), calculationResult);
+		Collections.sort(candidates, new Comparator<Trajectory>() {
+			public int compare(Trajectory o1, Trajectory o2) {
+				return (int) (o2.getPoints().size() - o1.getPoints().size());
+			}
+		});
 		calculationResult.setTrajectoriesAnalysed(candidates.size());
-		calculationResult.setQueryTime(System.currentTimeMillis() - startTime);
-		startTime = System.currentTimeMillis();
+		Long startTime = System.currentTimeMillis();
 		if(!candidates.isEmpty()) {
 			List<Group> groups = this.getGroupTrajectories(candidates, request.getDistance());
 			if(!groups.isEmpty()) {
@@ -165,6 +176,7 @@ public class TODS {
 	public Route getNotStandardTrajectoriesSegments(Trajectory ns, List<Group> GT, double distance, double angle) {
     	Route route = new Route();
     	for(Point p : ns.getPoints()) {
+    		p.setStandard(false);
     		for(Group g : GT) {
     			for(Trajectory st : g.getTrajectories()) {
     				if(st.binarySearch(p, distance) != null) {
