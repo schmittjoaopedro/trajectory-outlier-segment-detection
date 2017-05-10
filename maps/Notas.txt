@@ -1,66 +1,95 @@
-San Francisco
+San Francisco - Menor -> Maior
 ========================================
-calculateRegionsTime(117,505);
-calculateRegionsTime(225,199); //Provado
-calculateRegionsTime(235,146); //Provado
-calculateRegionsTime(324,504);
-calculateRegionsTime(325,267);
-calculateRegionsTime(349,410); //Provado
-calculateRegionsTime(359,449); //Provado
-calculateRegionsTime(382,501);
-calculateRegionsTime(386,355);
-calculateRegionsTime(416,265);
-calculateRegionsTime(443,563);
-calculateRegionsTime(467,531);
-calculateRegionsTime(468,504);
-calculateRegionsTime(471,500);
-calculateRegionsTime(475,415);
-calculateRegionsTime(500,559);
-calculateRegionsTime(505,561); //Provado
-calculateRegionsTime(505,626);
-calculateRegionsTime(530,621); //Provado
-calculateRegionsTime(532,501);
-calculateRegionsTime(533,658); //Provado
-calculateRegionsTime(555,586);
-calculateRegionsTime(557,564);
-calculateRegionsTime(563,624);
-calculateRegionsTime(564,560);
-calculateRegionsTime(564,595);
-calculateRegionsTime(564,621); //Provado
-calculateRegionsTime(568,629); //Provado
-calculateRegionsTime(589,593); //Provado
-calculateRegionsTime(596,564);
-calculateRegionsTime(618,620);
-calculateRegionsTime(619,652);
-calculateRegionsTime(620,562);
-calculateRegionsTime(621,564);
-calculateRegionsTime(621,594); //Provado
-calculateRegionsTime(621,652);
-calculateRegionsTime(622,595);
-calculateRegionsTime(626,629); //Provado
-calculateRegionsTime(628,505); //Provado
-calculateRegionsTime(650,682); //Provado
-calculateRegionsTime(657,597);
-calculateRegionsTime(688,656);
-calculateRegionsTime(711,683);
-calculateRegionsTime(741,746);
-calculateRegionsTime(767,680);
-calculateRegionsTime(777,718);
-calculateRegionsTime(830,833); //Provado
+_116_416
+_116_419
+_116_507
+_116_533
+_146_596
+_195_199
+_379_438
+_380_382
+_380_470
+_380_471
+_380_473
+_380_561
+_380_445
+_409_499
+_410_620
+_415_562
+_434_439
+_467_561
+_469_560
+_471_475
+_471_595
+_475_624
+_521_677
+_523_560
+_523_644
+_529_595
+_531_656
+_553_586
+_560_740
+_561_596
+_584_675
+_599_656
+_612_616
+_648_682
+_650_677
+_824_828
 
 
 
-Joinville
+Joinville - Menor -> Maior
 ========================================
-calculateRegionsTime(282,550);
-calculateRegionsTime(283,438); //Provado
-calculateRegionsTime(312,460);
-calculateRegionsTime(438,706); //Provado
-calculateRegionsTime(468,466);
-calculateRegionsTime(527,677); //Provado
-calculateRegionsTime(557,556); //Provado
-calculateRegionsTime(706,528);
-calculateRegionsTime(708,711); //Provado
-calculateRegionsTime(736,587);
-calculateRegionsTime(737,826);
-calculateRegionsTime(826,554);
+_226_255
+_227_255
+_251_342
+_251_343
+_251_460
+_281_284
+_312_460
+_312_580
+_316_377
+_342_436
+_342_727
+_347_496
+_374_496
+_377_796
+_378_437
+_378_677
+_378_707
+_408_467
+_438_556
+_460_761
+_467_526
+_468_707
+_496_676
+_497_556
+_497_646
+_523_616
+_526_826
+_527_616
+_527_676
+_556_617
+_556_767
+_585_681
+_586_647
+_586_677
+_586_680
+_586_767
+_586_826
+_587_677
+_587_766
+_592_706
+_593_679
+_616_648
+_616_650
+_619_651
+_646_650
+_646_767
+_646_795
+_646_826
+_647_676
+_650_706
+_651_708
+_707_711

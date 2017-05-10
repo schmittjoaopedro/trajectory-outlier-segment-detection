@@ -17,12 +17,19 @@ import org.udesc.trajectory.TODS.Trajectory;
 
 public class TODSTest {
 	
+//	Joinville
 	private static double latSt = -26.370924;
 	private static double latEn = -26.237597;
 	private static double lngSt = -48.944078;
 	private static double lngEn = -48.775826;
+//	San Francisco
+//	private static double latSt = 37.711624;
+//	private static double latEn = 37.813405;
+//	private static double lngSt = -122.495955;
+//	private static double lngEn = -122.390732;
+	
 	private static double L = 30.0;
-	private static String outputFolder = "/home/joao/Área de Trabalho/Mestrado/output/TODS/Joinville";
+	private static String outputFolder = "/home/joao/Área de Trabalho/Mestrado/output/TODS/Joinville - Inv";
 	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
@@ -45,11 +52,11 @@ public class TODSTest {
     			request.setkStandard(1);
     			request.setStartHour(0);
     			request.setEndHour(23);
-    			request.setStartGrid(regions.get(i));
-    			request.setEndGrid(regions.get(j));
+    			request.setStartGrid(regions.get(j));
+    			request.setEndGrid(regions.get(i));
     			TODSResult result = tods.run(request, trajectories);
     			if(!result.getNotStandards().isEmpty()) {
-    				printData(request.getStartGrid(), request.getEndGrid(), i, j, result);
+    				printData(request.getEndGrid(), request.getStartGrid(), j, i, result);
     			}
         	}
     		System.out.println(i + " in " + (System.currentTimeMillis() - tStart));

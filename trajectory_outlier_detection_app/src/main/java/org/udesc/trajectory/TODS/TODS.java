@@ -39,11 +39,6 @@ public class TODS {
 	public TODSResult run(TODSRequest request, List<Trajectory> trajectories) throws Exception {
 		TODSResult calculationResult = new TODSResult();
 		List<Trajectory> candidates = this.getCandidatesTrajectories(trajectories, request.getStartGrid(), request.getEndGrid(), request.getStartHour(), request.getEndHour(), calculationResult);
-		Collections.sort(candidates, new Comparator<Trajectory>() {
-			public int compare(Trajectory o1, Trajectory o2) {
-				return (int) (o2.getPoints().size() - o1.getPoints().size());
-			}
-		});
 		calculationResult.setTrajectoriesAnalysed(candidates.size());
 		Long startTime = System.currentTimeMillis();
 		if(!candidates.isEmpty()) {
