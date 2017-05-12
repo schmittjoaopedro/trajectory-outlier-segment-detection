@@ -41,12 +41,22 @@ public class TODS {
 		List<Trajectory> candidates = this.getCandidatesTrajectories(trajectories, request.getStartGrid(), request.getEndGrid(), request.getStartHour(), request.getEndHour(), calculationResult);
 		calculationResult.setTrajectoriesAnalysed(candidates.size());
 		Long startTime = System.currentTimeMillis();
+		
+		Collections.sort(candidates, new Comparator<Trajectory>() {
+			public int compare(Trajectory o1, Trajectory o2) {
+				return (int) (o1.getPoints().size() - o2.getPoints().size());
+			}
+		});
+		
 		if(!candidates.isEmpty()) {
 			List<Group> groups = this.getGroupTrajectories(candidates, request.getDistance());
+		
 			if(!groups.isEmpty()) {
 				List<Group> standard = this.getStandardTrajectories(groups, request.getkStandard());
+			
 				if(!standard.isEmpty()) {
 					List<Group> notStandards = this.getNotStandardTrajectories(groups, standard, request.getDistance(), request.getAngle());
+				
 					if(!notStandards.isEmpty()) {
 						Collections.sort(notStandards, new Comparator<Group>() {
 							public int compare(Group o1, Group o2) {
