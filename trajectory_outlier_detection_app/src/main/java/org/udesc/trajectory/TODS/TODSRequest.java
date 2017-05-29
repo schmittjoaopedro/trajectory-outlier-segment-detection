@@ -41,6 +41,8 @@ public class TODSRequest implements Serializable {
 	
 	private double sigma;
 	
+	private double similarityRatio;
+	
 	public TODSRequest() {
 		super();
 	}
@@ -147,6 +149,14 @@ public class TODSRequest implements Serializable {
 
 	public void setSigma(double sigma) {
 		this.sigma = sigma;
+	}
+
+	public double getSimilarityRatio() {
+		return similarityRatio;
+	}
+
+	public void setSimilarityRatio(double similarityRatio) {
+		this.similarityRatio = similarityRatio;
 	}
 	
 }

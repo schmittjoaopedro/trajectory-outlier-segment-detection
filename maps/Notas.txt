@@ -11,16 +11,16 @@ execute(380,382);
 execute(380,470);*
 execute(380,471);*
 execute(380,473);*
-execute(380,561);***
+execute(380,561);***ok
 execute(380,445);
 execute(409,499);
 execute(410,620);*
 execute(415,562);*
-execute(434,439);***
+execute(434,439);***ok
 execute(467,561);
 execute(469,560);
 execute(471,475);
-execute(471,595);***
+execute(471,595);***ok
 execute(475,624);*
 execute(521,677);
 execute(523,560);
@@ -38,6 +38,26 @@ execute(650,677);*
 execute(824,828);
 
 
+San Francisco - Maior -> Menor
+========================================
+execute(350,230);
+execute(468,440);***
+execute(492,436);
+execute(507,504);
+execute(529,470);*
+execute(553,527);
+execute(591,415);***ok
+execute(616,530);
+execute(625,566);*
+execute(626,599);
+execute(627,592);
+execute(629,567);*
+execute(650,588);
+execute(687,563);
+execute(710,677);
+execute(742,621);
+
+
 
 Joinville - Menor -> Maior
 ========================================
@@ -52,12 +72,12 @@ execute(312,580);
 execute(316,377);
 execute(342,436);
 execute(342,727);
-execute(347,496);***
+execute(347,496);***ok
 execute(374,496);
 execute(377,796);*
 execute(378,437);
 execute(378,677);
-execute(378,707);***
+execute(378,707);***ok
 execute(408,467);**
 execute(438,556);**
 execute(460,761);
@@ -83,7 +103,7 @@ execute(587,766);
 execute(592,706);**
 execute(593,679);
 execute(616,648);
-execute(616,650);***
+execute(616,650);***ok
 execute(619,651);
 execute(646,650);
 execute(646,767);
@@ -106,7 +126,7 @@ execute(587,407);
 execute(646,467);
 execute(648,593);**
 execute(651,593);
-execute(676,527);***
+execute(676,527);***ok
 execute(677,527);*
 execute(677,587);
 execute(677,622);*
@@ -118,3 +138,136 @@ execute(737,621);**
 execute(767,681);*
 execute(795,650);
 execute(826,676);
+
+
+---------------------------------------------------------------------------------
+
+EUA - SEM BANCO
+
+25.000 trajectories
+=========================== 100 ===========================
+Time: u = 44.95000000000001, sd = 21.01388429903745
+Memory: u = 244.47000000000006, sd = 79.09225593883986
+Trajectories: 325.0
+Trajectories STD: 174.0
+Trajectories NOT STD: 151.0
+Trajectories STD SEG: 116.0
+Trajectories NOT STD SEG: 126.0
+=========================== 1000 ===========================
+Time: u = 42.444, sd = 11.081139637043501
+Memory: u = 248.25099999999986, sd = 59.29629034812424
+Trajectories: 801.0
+Trajectories STD: 550.0
+Trajectories NOT STD: 251.0
+Trajectories STD SEG: 159.0
+Trajectories NOT STD SEG: 263.0
+=========================== 10000 ===========================
+Time: u = 41.55760000000001, sd = 5.999356754532607
+Memory: u = 310.5948000000004, sd = 109.01635872476585
+Trajectories: 12124.0
+Trajectories STD: 8551.0
+Trajectories NOT STD: 3573.0
+Trajectories STD SEG: 2668.0
+Trajectories NOT STD SEG: 3399.0
+=========================== 100000 ===========================
+Time: u = 39.79421000000318, sd = 5.895122390636316
+Memory: u = 285.62740000000235, sd = 90.17113084334817
+Trajectories: 125622.0
+Trajectories STD: 89192.0
+Trajectories NOT STD: 36430.0
+Trajectories STD SEG: 27138.0
+Trajectories NOT STD SEG: 34608.0
+
+
+18.000 trajectories
+=========================== 100 ===========================
+Time: u = 31.450000000000006, sd = 23.612346967062127
+Memory: u = 260.74, sd = 24.160080607264018
+Trajectories: 357.0
+Trajectories STD: 351.0
+Trajectories NOT STD: 6.0
+Trajectories STD SEG: 3.0
+Trajectories NOT STD SEG: 6.0
+=========================== 1000 ===========================
+Time: u = 34.376999999999995, sd = 9.370521739886092
+Memory: u = 262.0440000000001, sd = 61.68123408816199
+Trajectories: 650.0
+Trajectories STD: 499.0
+Trajectories NOT STD: 151.0
+Trajectories STD SEG: 122.0
+Trajectories NOT STD SEG: 162.0
+=========================== 10000 ===========================
+Time: u = 33.57649999999996, sd = 4.3388743163444365
+Memory: u = 308.3719000000012, sd = 104.83597688100598
+Trajectories: 11314.0
+Trajectories STD: 7811.0
+Trajectories NOT STD: 3503.0
+Trajectories STD SEG: 2402.0
+Trajectories NOT STD SEG: 2848.0
+=========================== 100000 ===========================
+Time: u = 32.54887999999924, sd = 5.180997893552283
+Memory: u = 171.699219999987, sd = 60.63505996942593
+Trajectories: 100596.0
+Trajectories STD: 68747.0
+Trajectories NOT STD: 31849.0
+Trajectories STD SEG: 22844.0
+Trajectories NOT STD SEG: 28501.0
+
+
+10.000 trajectories
+=========================== 100 ===========================
+Time: u = 18.850000000000005, sd = 19.832314717922046
+Memory: u = 210.99, sd = 13.50083798371887
+Trajectories: 374.0
+Trajectories STD: 130.0
+Trajectories NOT STD: 244.0
+Trajectories STD SEG: 64.0
+Trajectories NOT STD SEG: 195.0
+=========================== 1000 ===========================
+Time: u = 18.603000000000026, sd = 8.349557240123916
+Memory: u = 248.60300000000058, sd = 67.33543979549303
+Trajectories: 520.0
+Trajectories STD: 403.0
+Trajectories NOT STD: 117.0
+Trajectories STD SEG: 53.0
+Trajectories NOT STD SEG: 112.0
+=========================== 10000 ===========================
+Time: u = 18.015500000000024, sd = 3.383549111577748
+Memory: u = 299.7527999999986, sd = 101.59950559975105
+Trajectories: 5803.0
+Trajectories STD: 3686.0
+Trajectories NOT STD: 2117.0
+Trajectories STD SEG: 1353.0
+Trajectories NOT STD SEG: 1849.0
+=========================== 100000 ===========================
+Time: u = 15.480799999999997, sd = 2.7453354492040183
+Memory: u = 267.32532999998784, sd = 78.54620987330935
+Trajectories: 49790.0
+Trajectories STD: 34395.0
+Trajectories NOT STD: 15395.0
+Trajectories STD SEG: 9913.0
+Trajectories NOT STD SEG: 14428.0
+
+
+EUA - COM BANCO
+
+=========================== 100 ===========================
+Time: u = 0.2600000000000002, sd = 1.6613247725836158
+Memory: u = 15.350000000000001, sd = 3.701965080135884
+Trajectories: 144.0
+Trajectories STD: 117.0
+Trajectories NOT STD: 27.0
+Trajectories STD SEG: 24.0
+Trajectories NOT STD SEG: 14.0
+=========================== 1000 ===========================
+Time: u = 0.29500000000000387, sd = 6.015327020134456
+Memory: u = 27.75599999999999, sd = 7.581156767798586
+Trajectories: 1560.0
+Trajectories STD: 1028.0
+Trajectories NOT STD: 532.0
+Trajectories STD SEG: 367.0
+Trajectories NOT STD SEG: 457.0
+
+---------------------- STATISTICS ----------------------
+EUA
+

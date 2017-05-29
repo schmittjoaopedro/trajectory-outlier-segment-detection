@@ -6,8 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.udesc.database.TrajectoryMongoDB;
 import org.udesc.trajectory.TODS.Grid;
+import org.udesc.trajectory.TODS.Group;
 import org.udesc.trajectory.TODS.Point;
 import org.udesc.trajectory.TODS.Route;
 import org.udesc.trajectory.TODS.TODS;
@@ -22,54 +22,152 @@ public class TODSTest {
 //	private static double latEn = -26.237597;
 //	private static double lngSt = -48.944078;
 //	private static double lngEn = -48.775826;
+	
 //	San Francisco
 	private static double latSt = 37.711624;
 	private static double latEn = 37.813405;
 	private static double lngSt = -122.495955;
 	private static double lngEn = -122.390732;
+	private static String country = "EUA";
+	private static String state = "CA";
+	private static String city = "San Francisco";
+	private static String outputFile = "/home/joao/Área de Trabalho/Mestrado/Estatísticas/statistics_eua.csv";
+	private static String inputFile  = "/home/joao/Área de Trabalho/Mestrado/Estatísticas/eua_best.csv";
 	
+	private static String outputFolder = "/home/joao/Área de Trabalho/Mestrado/Temp";
 	private static double L = 30.0;
-	private static String outputFolder = "/home/joao/Área de Trabalho/Mestrado/output/TODS/San Francisco - Inv";
 	private static List<Trajectory> trajectories;
 	private static List<Grid> regions;
 	private static TODS tods;
 	
-	@SuppressWarnings("unchecked")
 	public static void main(String[] args) throws Exception {
 		
-		trajectories = new TrajectoryMongoDB().findAll("EUA", Trajectory.class, Point.class);
-		for(Trajectory trajectory : trajectories) {
-			trajectory.filterNoise(0.0015, 0.001);
-			trajectory.interpolate(0.0003);
-		}
+//		trajectories = new TrajectoryMongoDB().findAll(country, Trajectory.class, Point.class);
 		regions =  createGrid();
 		tods = new TODS();
 		
-		for(int i = 0; i < regions.size(); i++) {
-    		long tStart = System.currentTimeMillis();
-    		for(int j = i + 1; j < regions.size(); j++) {
-    			execute(j, i);
-        	}
-    		System.out.println(i + " in " + (System.currentTimeMillis() - tStart));
-    	}
+		
+//		FileUtils.write(new File(outputFile), "R1,R2,QT,PT,MEM,STD,NSTD,STDSEG,NOTSTDSEG\n", "UTF-8", true);
+//		for(int i = 0; i < regions.size(); i++) {
+//			for(int j = i + 1; j < regions.size(); j++) {
+//				execute(i, j);
+//			}
+//		}
+		
+//		int regions[][] = readRegions();
+//		for(int i = 0; i < regions.length; i++) {
+//			executeProgram(regions[i][0], regions[i][1]);
+//		}
+		
+		execute(562, 593);
 		
 	}
 	
-	public static void execute(int i, int j) throws Exception {
+	public static void executeProgram(int i, int j) throws Exception {
 		TODSRequest request = new TODSRequest();
+		request.setCountry(country);
+		request.setState(state);
+		request.setCity(city);
 		request.setAngle(30.0);
-		request.setDistance(0.0003);
+		request.setDistance(0.00044996400287976963);
 		request.setkStandard(1);
+		request.setInterpolation(0.0003);
+		request.setSd(0.01);
+		request.setSigma(0.0015);
+		request.setSimilarityRatio(0.95);
 		request.setStartHour(0);
 		request.setEndHour(23);
 		request.setStartGrid(regions.get(i));
 		request.setEndGrid(regions.get(j));
-		TODSResult result = tods.run(request, trajectories);
-		if(!result.getNotStandards().isEmpty()) {
-			printData(request.getStartGrid(), request.getEndGrid(), i, j, result);
+		TODSResult result = tods.run(request);
+		int countStd = 0;
+		for(Group group : result.getStandards()) {
+			countStd += group.getTrajectories().size();
+		}
+		int countNotStd = 0;
+		int nStd = 0;
+		int std = 0;
+		for(Group group : result.getNotStandards()) {
+			countNotStd += group.getTrajectories().size();
+			for(Route route : group.getRoutes()) {
+				std += route.getStandards().size();
+				nStd += route.getNotStandards().size();
+			}
+		}
+		if(j % 100 == 0) {
+			System.out.println(i + "\t" + j);
+		}
+		if(countStd > 0) {
+			String data = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+				i,
+				j,
+				result.getQueryTime(), 
+				result.getProgramTime(),
+				(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()),
+				countStd,
+				countNotStd,
+				std,
+				nStd);
+			FileUtils.write(new File(outputFile), data, "UTF-8", true);
 		}
 	}
 	
+	public static List<Trajectory> getTrajectories(List<Trajectory> trajectoriesDB) {
+		List<Trajectory> trajectories = new ArrayList<>();
+		for(Trajectory t : trajectoriesDB) {
+			Trajectory nT = new Trajectory();
+			nT.setCity(t.getCity());
+			nT.setCountry(t.getCountry());
+			nT.setName(t.getName());
+			nT.setStartHour(t.getStartHour());
+			nT.setStartMinute(t.getStartMinute());
+			nT.setState(t.getState());
+			for(Point p : t.getPoints()) {
+				Point nP = new Point();
+				nP.setLat(p.getLat());
+				nP.setLng(p.getLng());
+				nP.setStandard(false);
+				nP.setTimestamp(p.getTimestamp());
+				nT.getPoints().add(nP);
+			}
+			trajectories.add(nT);
+		}
+		return trajectories;
+	}
+	
+	public static void execute(int i, int j) throws Exception {
+//		for(int h = 4; h < 24; h += 4) {
+//			int n = h - 4;
+			TODSRequest request = new TODSRequest();
+			request.setCountry(country);
+			request.setState(state);
+			request.setCity(city);
+			request.setAngle(30.0);
+			request.setDistance(0.00044996400287976963);
+			request.setkStandard(1);
+			request.setInterpolation(0.0003);
+			request.setSd(0.01);
+			request.setSigma(0.0015);
+			request.setSimilarityRatio(0.95);
+			request.setStartHour(0);
+			request.setEndHour(23);
+			request.setStartGrid(regions.get(i));
+			request.setEndGrid(regions.get(j));
+			TODSResult result = tods.run(request);
+			System.out.println(i + "\t" + j);
+			if(!result.getNotStandards().isEmpty()) {
+				printData(request.getStartGrid(), request.getEndGrid(), i, j, result);
+			}
+//		}
+	}
+	
+	public static boolean betweenLat(Point p, Grid grid) {
+		return grid.getLatMin() <= p.getLat() && p.getLat() <= grid.getLatMax();
+	}
+	
+	public boolean betweenLng(Point p, Grid grid) {
+		return grid.getLngMin() <= p.getLng() && p.getLng() <= grid.getLngMax();
+	}
 	
 	public static List<Grid> createGrid() {
     	List<Grid> grids = new ArrayList<Grid>();
@@ -89,7 +187,7 @@ public class TODSTest {
     }
 	
 	public static void printData(Grid SR, Grid ER, int i, int j, TODSResult result) throws Exception {
-    	File file = new File(outputFolder + "/_" + i + "_" + j + ".txt");
+    	File file = new File(outputFolder + "/TODS_" + i + "_" + j + ".txt");
     	int standards = 0, notStandards = 0, stdSeg = 0, notStdSeg = 0;
     	
     	FileUtils.write(file, "//Start grid", "UTF-8", true);
@@ -153,6 +251,18 @@ public class TODSTest {
 		}
 		data.append("], '#" + color + "');");
 		return data.toString();
+	}
+	
+	public static int[][] readRegions() throws Exception {
+		List<String> lines = FileUtils.readLines(new File(inputFile), "UTF-8");
+		lines.remove(0);
+		int regions[][] = new int[lines.size()][2];
+		for(int i = 0; i < lines.size(); i++) {
+			String line[] = lines.get(i).split(",");
+			regions[i][0] = Integer.valueOf(line[0]);
+			regions[i][1] = Integer.valueOf(line[1]);
+		}
+		return regions;
 	}
 	
 }

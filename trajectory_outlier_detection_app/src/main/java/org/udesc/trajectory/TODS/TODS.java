@@ -24,13 +24,25 @@ public class TODS {
 	
 	@SuppressWarnings("unchecked")
 	public TODSResult run(TODSRequest request) throws Exception {
-		Long startTime = System.currentTimeMillis();
+		Long startTime = System.nanoTime();
 		List<Trajectory> candidates = (List<Trajectory>) trajectoryBase.findTrajectories(request.getCountry(), request.getState(), request.getCity(), request.getStartHour(), request.getEndHour(), request.getStartGrid(), request.getEndGrid(), Trajectory.class, Point.class);
 		for(Trajectory trajectory : candidates) {
 			trajectory.filterNoise(request.getSigma(), request.getSd());
 			trajectory.interpolate(request.getInterpolation());
 		}
-		startTime = System.currentTimeMillis() - startTime;
+		startTime = System.nanoTime() - startTime;
+		TODSResult calculationResult = this.run(request, candidates);
+		calculationResult.setQueryTime(startTime);
+		return calculationResult;
+	}
+	
+	public TODSResult runExternal(TODSRequest request, List<Trajectory> candidates) throws Exception {
+		Long startTime = System.nanoTime();
+		for(Trajectory trajectory : candidates) {
+			trajectory.filterNoise(request.getSigma(), request.getSd());
+			trajectory.interpolate(request.getInterpolation());
+		}
+		startTime = System.nanoTime() - startTime;
 		TODSResult calculationResult = this.run(request, candidates);
 		calculationResult.setQueryTime(startTime);
 		return calculationResult;
@@ -40,7 +52,7 @@ public class TODS {
 		TODSResult calculationResult = new TODSResult();
 		List<Trajectory> candidates = this.getCandidatesTrajectories(trajectories, request.getStartGrid(), request.getEndGrid(), request.getStartHour(), request.getEndHour(), calculationResult);
 		calculationResult.setTrajectoriesAnalysed(candidates.size());
-		Long startTime = System.currentTimeMillis();
+		Long startTime = System.nanoTime();
 		
 		Collections.sort(candidates, new Comparator<Trajectory>() {
 			public int compare(Trajectory o1, Trajectory o2) {
@@ -69,7 +81,7 @@ public class TODS {
 				}
 			}
 		}
-		calculationResult.setProgramTime(System.currentTimeMillis() - startTime);
+		calculationResult.setProgramTime(System.nanoTime() - startTime);
 		return calculationResult;
 	}
 	

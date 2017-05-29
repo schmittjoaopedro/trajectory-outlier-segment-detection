@@ -23,6 +23,12 @@ public class Point implements Serializable, IPoint {
 		super();
 	}
 
+	public Point(double lat, double lng) {
+		super();
+		this.lat = lat;
+		this.lng = lng;
+	}
+	
 	public Point(double lat, double lng, long timestamp) {
 		super();
 		this.lat = lat;

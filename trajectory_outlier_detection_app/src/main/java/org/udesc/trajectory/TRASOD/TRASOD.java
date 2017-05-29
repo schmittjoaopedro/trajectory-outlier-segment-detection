@@ -16,9 +16,16 @@ public class TRASOD {
 	
 	@SuppressWarnings("unchecked")
 	public TRASODResult run(TRASODRequest request) throws Exception {
-		TRASODResult calculationResult = new TRASODResult();
 		Long startTime = System.currentTimeMillis();
 		List<Trajectory> trajectories = trajectoryBase.findTrajectories(request.getCountry(), request.getState(), request.getCity(), 0, 23, request.getStartGrid(), request.getEndGrid(), Trajectory.class, Point.class);
+		startTime = System.currentTimeMillis() - startTime;
+		TRASODResult calculationResult = this.run(request, trajectories);
+		return calculationResult;
+	}
+	
+	public TRASODResult run(TRASODRequest request, List<Trajectory> trajectories) throws Exception {
+		TRASODResult calculationResult = new TRASODResult();
+		Long startTime = System.currentTimeMillis();
 		calculationResult.setRawResult(trajectories);
 		calculationResult.setQueryTime(System.currentTimeMillis() - startTime);
 		startTime = System.currentTimeMillis();
