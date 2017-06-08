@@ -22,6 +22,11 @@ public class TODSTest {
 //	private static double latEn = -26.237597;
 //	private static double lngSt = -48.944078;
 //	private static double lngEn = -48.775826;
+//	private static String country = "Brazil";
+//	private static String state = "SC";
+//	private static String city = "Joinville";
+//	private static String outputFile = "/home/joao/Área de Trabalho/Mestrado/Estatísticas/statistics_bra.csv";
+//	private static String inputFile  = "/home/joao/Área de Trabalho/Mestrado/Estatísticas/brasil_best.csv";
 	
 //	San Francisco
 	private static double latSt = 37.711624;
@@ -47,19 +52,19 @@ public class TODSTest {
 		tods = new TODS();
 		
 		
-//		FileUtils.write(new File(outputFile), "R1,R2,QT,PT,MEM,STD,NSTD,STDSEG,NOTSTDSEG\n", "UTF-8", true);
+		FileUtils.write(new File(outputFile), "R1,R2,QT,PT,MEM,STD,NSTD,STDSEG,NOTSTDSEG,PTQTDALL,PTQTDEPR\n", "UTF-8", true);
 //		for(int i = 0; i < regions.size(); i++) {
 //			for(int j = i + 1; j < regions.size(); j++) {
 //				execute(i, j);
 //			}
 //		}
 		
-//		int regions[][] = readRegions();
-//		for(int i = 0; i < regions.length; i++) {
-//			executeProgram(regions[i][0], regions[i][1]);
-//		}
+		int regions[][] = readRegions();
+		for(int i = 0; i < regions.length; i++) {
+			executeProgram(regions[i][0], regions[i][1]);
+		}
 		
-		execute(562, 593);
+//		execute(562, 593);
 		
 	}
 	
@@ -80,25 +85,38 @@ public class TODSTest {
 		request.setStartGrid(regions.get(i));
 		request.setEndGrid(regions.get(j));
 		TODSResult result = tods.run(request);
+		
 		int countStd = 0;
-		for(Group group : result.getStandards()) {
-			countStd += group.getTrajectories().size();
-		}
 		int countNotStd = 0;
 		int nStd = 0;
 		int std = 0;
+		long pointQtdeAll = 0;
+		long pointQtdeProcessed = 0;
+		
+		for(Group group : result.getStandards()) {
+			countStd += group.getTrajectories().size();
+			for(Trajectory t : group.getTrajectories()) {
+				pointQtdeProcessed += t.getPoints().size();
+			}
+		}
 		for(Group group : result.getNotStandards()) {
 			countNotStd += group.getTrajectories().size();
 			for(Route route : group.getRoutes()) {
 				std += route.getStandards().size();
 				nStd += route.getNotStandards().size();
 			}
+			for(Trajectory t : group.getTrajectories()) {
+				pointQtdeProcessed += t.getPoints().size();
+			}
+		}
+		for(Trajectory t : result.getRawResult()) {
+			pointQtdeAll += t.getPoints().size();
 		}
 		if(j % 100 == 0) {
 			System.out.println(i + "\t" + j);
 		}
 		if(countStd > 0) {
-			String data = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+			String data = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
 				i,
 				j,
 				result.getQueryTime(), 
@@ -107,7 +125,9 @@ public class TODSTest {
 				countStd,
 				countNotStd,
 				std,
-				nStd);
+				nStd,
+				pointQtdeAll,
+				pointQtdeProcessed);
 			FileUtils.write(new File(outputFile), data, "UTF-8", true);
 		}
 	}
