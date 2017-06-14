@@ -6,18 +6,22 @@ import java.time.ZoneId;
 
 import org.udesc.database.IPoint;
 
-public class Point implements Serializable, IPoint {
+public class Point implements Serializable, IPoint<Trajectory> {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
+	private int id;
+
 	private double lat;
 	
 	private double lng;
 	
 	private long timestamp;
+	
+	private Trajectory trajectory;
 	
 	public Point() {
 		super();
@@ -36,7 +40,17 @@ public class Point implements Serializable, IPoint {
 		this.timestamp = timestamp;
 	}
 
-	@Override
+    @Override
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
 	public double getLat() {
 		return lat;
 	}
@@ -78,6 +92,16 @@ public class Point implements Serializable, IPoint {
 	 */
 	public double calculateDistance(Point point) {
 		return Math.sqrt(Math.pow(this.getLat() - point.getLat(), 2) + Math.pow(this.getLng() - point.getLng(), 2));
+	}
+
+	@Override
+	public Trajectory getTrajectory() {
+		return trajectory;
+	}
+
+	@Override
+	public void setTrajectory(Trajectory trajectory) {
+		this.trajectory = trajectory;
 	}
 	
 }

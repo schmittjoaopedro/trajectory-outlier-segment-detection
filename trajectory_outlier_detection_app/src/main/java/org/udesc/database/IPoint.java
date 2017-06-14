@@ -1,6 +1,10 @@
 package org.udesc.database;
 
-public interface IPoint {
+public interface IPoint<T> {
+
+    int getId();
+
+    void setId(int id);
 
 	double getLng();
 	
@@ -13,5 +17,9 @@ public interface IPoint {
 	long getTimestamp();
 	
 	void setTimestamp(long timestamp);
+	
+	T getTrajectory();
+	
+	void setTrajectory(T trajectory);
 	
 }

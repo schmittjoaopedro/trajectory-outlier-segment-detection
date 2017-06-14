@@ -48,9 +48,12 @@ public class TrajectoryMongoDB extends Database {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private List<ITrajectory> createTrajectories(Class<? extends ITrajectory> trajectoryClazz, Class<? extends IPoint> pointClazz, DBCursor cursor) throws InstantiationException, IllegalAccessException {
 		List<ITrajectory> trajectoriesFound = new ArrayList<ITrajectory>();
+        int id = 0;
+        int pId = 0;
 		while (cursor.hasNext()) {
 			DBObject object = cursor.next();
 			ITrajectory t = trajectoryClazz.newInstance();
+			t.setId(id++);
 			t.setName(String.valueOf(object.get("name")));
 			t.setCountry(String.valueOf(object.get("country")));
 			t.setState(String.valueOf(object.get("state")));
@@ -61,9 +64,11 @@ public class TrajectoryMongoDB extends Database {
 			for(int i = 0; i < coordinates.size(); i++) {
 				BasicDBList coordinate = (BasicDBList) coordinates.get(i);
 				IPoint p = pointClazz.newInstance();
+				p.setId(pId++);
 				p.setLng((double) coordinate.get(0));
 				p.setLat((double) coordinate.get(1));
 				p.setTimestamp((long) coordinate.get(2));
+				p.setTrajectory(t);
 				t.getPoints().add(p);
 			}
 			t.sortPoints();

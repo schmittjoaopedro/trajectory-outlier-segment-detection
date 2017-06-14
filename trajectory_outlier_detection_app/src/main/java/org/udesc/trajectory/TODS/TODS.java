@@ -26,10 +26,6 @@ public class TODS {
 	public TODSResult run(TODSRequest request) throws Exception {
 		Long startTime = System.nanoTime();
 		List<Trajectory> candidates = (List<Trajectory>) trajectoryBase.findTrajectories(request.getCountry(), request.getState(), request.getCity(), request.getStartHour(), request.getEndHour(), request.getStartGrid(), request.getEndGrid(), Trajectory.class, Point.class);
-		for(Trajectory trajectory : candidates) {
-			trajectory.filterNoise(request.getSigma(), request.getSd());
-			trajectory.interpolate(request.getInterpolation());
-		}
 		startTime = System.nanoTime() - startTime;
 		TODSResult calculationResult = this.run(request, candidates);
 		calculationResult.setQueryTime(startTime);
@@ -38,10 +34,6 @@ public class TODS {
 	
 	public TODSResult runExternal(TODSRequest request, List<Trajectory> candidates) throws Exception {
 		Long startTime = System.nanoTime();
-		for(Trajectory trajectory : candidates) {
-			trajectory.filterNoise(request.getSigma(), request.getSd());
-			trajectory.interpolate(request.getInterpolation());
-		}
 		startTime = System.nanoTime() - startTime;
 		TODSResult calculationResult = this.run(request, candidates);
 		calculationResult.setQueryTime(startTime);
@@ -50,25 +42,35 @@ public class TODS {
 	
 	public TODSResult run(TODSRequest request, List<Trajectory> trajectories) throws Exception {
 		TODSResult calculationResult = new TODSResult();
+		
+		Long time = System.nanoTime();
+		for(Trajectory trajectory : trajectories) {
+			trajectory.filterNoise(request.getSigma(), request.getSd());
+			trajectory.interpolate(request.getInterpolation());
+		}
 		List<Trajectory> candidates = this.getCandidatesTrajectories(trajectories, request.getStartGrid(), request.getEndGrid(), request.getStartHour(), request.getEndHour(), calculationResult);
 		calculationResult.setTrajectoriesAnalysed(candidates.size());
-		Long startTime = System.nanoTime();
-		
 		Collections.sort(candidates, new Comparator<Trajectory>() {
 			public int compare(Trajectory o1, Trajectory o2) {
 				return (int) (o1.getPoints().size() - o2.getPoints().size());
 			}
 		});
+		calculationResult.setCandidateTime(System.nanoTime() - time);
+		time = System.nanoTime();
 		
 		if(!candidates.isEmpty()) {
 			List<Group> groups = this.getGroupTrajectories(candidates, request.getDistance());
+			calculationResult.setGroupTime(System.nanoTime() - time);
+			time = System.nanoTime();
 		
 			if(!groups.isEmpty()) {
 				List<Group> standard = this.getStandardTrajectories(groups, request.getkStandard());
+				calculationResult.setStandards(standard);
+				calculationResult.setStandardTime(System.nanoTime() - time);
+				time = System.nanoTime();
 			
 				if(!standard.isEmpty()) {
 					List<Group> notStandards = this.getNotStandardTrajectories(groups, standard, request.getDistance(), request.getAngle());
-				
 					if(!notStandards.isEmpty()) {
 						Collections.sort(notStandards, new Comparator<Group>() {
 							public int compare(Group o1, Group o2) {
@@ -76,12 +78,12 @@ public class TODS {
 							}
 						});
 						calculationResult.setNotStandards(notStandards);
+						calculationResult.setSegmentationTime(System.nanoTime() - time);
+						time = System.nanoTime();
 					}
-					calculationResult.setStandards(standard);
 				}
 			}
 		}
-		calculationResult.setProgramTime(System.nanoTime() - startTime);
 		return calculationResult;
 	}
 	
@@ -191,95 +193,95 @@ public class TODS {
     }
 	
 	public Route getNotStandardTrajectoriesSegments(Trajectory ns, List<Group> GT, double distance, double angle) {
-    	Route route = new Route();
-    	for(Point p : ns.getPoints()) {
-    		p.setStandard(false);
-    		for(Group g : GT) {
-    			for(Trajectory st : g.getTrajectories()) {
-    				if(st.binarySearch(p, distance) != null) {
-    					p.setStandard(true);
+		Route route = new Route();
+		for(Point p : ns.getPoints()) {
+			p.setStandard(false);
+			for(Group g : GT) {
+				for(Trajectory st : g.getTrajectories()) {
+					if(st.binarySearch(p, distance) != null) {
+						p.setStandard(true);
 						break;
-    				}
-    				if(p.isStandard()) break;
-    			}
-    			if(p.isStandard()) break;
-    		}
-    		
-    	}
-    	
-    	for(int i = 1; i < ns.getPoints().size() - 1; i++) {
-    		Point p = ns.getPoints().get(i);
-    		if(!p.isStandard()) {
-    			int prev = i - 1;
-    			int next = i + 1;
-    			Point current = p;
-    			Point prevP = ns.getPoints().get(prev);
-    			Point nextP = ns.getPoints().get(next);
-    			prev--;
-    			next++;
-    			while(prevP.isStandard() && prev >= 0) {
-    				for(Group g : GT) {
-    	    			for(Trajectory st : g.getTrajectories()) {
-    	    				if(!st.isLessAngleDifference(current, prevP, distance, angle)) {
-    	    					prevP.setStandard(false);
-    							break;
-    	    				}
-    	    				if(!prevP.isStandard()) break;
-    	    			}
-    	    			if(!prevP.isStandard()) break;
-    	    		}
-    				if(prevP.isStandard()) break;
-    				current = prevP;
-    				prevP = ns.getPoints().get(prev);
-    				prev--;
-    			}
-    			current = p;
-    			while(nextP.isStandard() && next < ns.getPoints().size()) {
-    				for(Group g : GT) {
-    	    			for(Trajectory st : g.getTrajectories()) {
-    	    				if(!st.isLessAngleDifference(current, nextP, distance, angle)) {
-    	    					nextP.setStandard(false);
-    							break;
-    	    				}
-    	    				if(!nextP.isStandard()) break;
-    	    			}
-    	    			if(!nextP.isStandard()) break;
-    	    		}
-    				if(nextP.isStandard()) break;
-    				current = nextP;
-    				nextP = ns.getPoints().get(next);
-    				next++;
-    			}
-    		}
-    	}
-    	
-    	Trajectory t = new Trajectory();
-    	t.getPoints().add(ns.getPoints().get(0));
-    	for(int i = 1; i < ns.getPoints().size(); i++) {
-    		Point curr = ns.getPoints().get(i);
-    		Point prev = ns.getPoints().get(i - 1);
-    		if(curr.isStandard() != prev.isStandard()) {
-    			if(prev.isStandard()) {
-    				route.getStandards().add(t);
-    			} else {
-    				route.getNotStandards().add(t);
-    			}
-    			t = new Trajectory();
-    			Point temp = new Point(prev.getLat(), prev.getLng(), prev.getTimestamp(), prev.isStandard());
-    			temp.setStandard(curr.isStandard());
-    			t.getPoints().add(temp);
-    		}
-    		t.getPoints().add(curr);
-    	}
-    	if(!t.getPoints().isEmpty()) {
-    		if(t.getPoints().get(0).isStandard()) {
-    			route.getStandards().add(t);
-    		} else {
-    			route.getNotStandards().add(t);
-    		}
-    	}
-    	
-    	return route;
+					}
+					if(p.isStandard()) break;
+				}
+				if(p.isStandard()) break;
+			}
+
+		}
+
+		for(int i = 1; i < ns.getPoints().size() - 1; i++) {
+			Point p = ns.getPoints().get(i);
+			if(!p.isStandard()) {
+				int prev = i - 1;
+				int next = i + 1;
+				Point current = p;
+				Point prevP = ns.getPoints().get(prev);
+				Point nextP = ns.getPoints().get(next);
+				prev--;
+				next++;
+				while(prevP.isStandard() && prev >= 0) {
+					for(Group g : GT) {
+						for(Trajectory st : g.getTrajectories()) {
+							if(!st.isLessAngleDifference(current, prevP, distance, angle)) {
+								prevP.setStandard(false);
+								break;
+							}
+							if(!prevP.isStandard()) break;
+						}
+						if(!prevP.isStandard()) break;
+					}
+					if(prevP.isStandard()) break;
+					current = prevP;
+					prevP = ns.getPoints().get(prev);
+					prev--;
+				}
+				current = p;
+				while(nextP.isStandard() && next < ns.getPoints().size()) {
+					for(Group g : GT) {
+						for(Trajectory st : g.getTrajectories()) {
+							if(!st.isLessAngleDifference(current, nextP, distance, angle)) {
+								nextP.setStandard(false);
+								break;
+							}
+							if(!nextP.isStandard()) break;
+						}
+						if(!nextP.isStandard()) break;
+					}
+					if(nextP.isStandard()) break;
+					current = nextP;
+					nextP = ns.getPoints().get(next);
+					next++;
+				}
+			}
+		}
+
+		Trajectory t = new Trajectory();
+		t.getPoints().add(ns.getPoints().get(0));
+		for(int i = 1; i < ns.getPoints().size(); i++) {
+			Point curr = ns.getPoints().get(i);
+			Point prev = ns.getPoints().get(i - 1);
+			if(curr.isStandard() != prev.isStandard()) {
+				if(prev.isStandard()) {
+					route.getStandards().add(t);
+				} else {
+					route.getNotStandards().add(t);
+				}
+				t = new Trajectory();
+				Point temp = new Point(prev.getLat(), prev.getLng(), t, prev.getTimestamp(), prev.isStandard());
+				temp.setStandard(curr.isStandard());
+				t.getPoints().add(temp);
+			}
+			t.getPoints().add(curr);
+		}
+		if(!t.getPoints().isEmpty()) {
+			if(t.getPoints().get(0).isStandard()) {
+				route.getStandards().add(t);
+			} else {
+				route.getNotStandards().add(t);
+			}
+		}
+
+		return route;
     }
 	
 }

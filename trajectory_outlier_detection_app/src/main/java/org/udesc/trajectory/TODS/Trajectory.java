@@ -1,14 +1,11 @@
 package org.udesc.trajectory.TODS;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.udesc.database.ITrajectory;
+
+import java.io.Serializable;
+import java.util.*;
 
 public class Trajectory implements Serializable, ITrajectory<Point> {
 
@@ -16,6 +13,8 @@ public class Trajectory implements Serializable, ITrajectory<Point> {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+
+	private int id;
 
 	private String name;
 	
@@ -33,11 +32,25 @@ public class Trajectory implements Serializable, ITrajectory<Point> {
 	
 	private Point[] pointsLat = null;
 	
+	private Group group = null;
+
+	private Set<Trajectory> nearTrajectories;
+
 	public Trajectory() {
 		super();
 	}
 
-	@Override
+    @Override
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
 	public String getName() {
 		return name;
 	}
@@ -112,7 +125,28 @@ public class Trajectory implements Serializable, ITrajectory<Point> {
 		this.startMinute = startMinute;
 	}
 	
-	/**
+	public Group getGroup() {
+		return group;
+	}
+
+	public void setGroup(Group group) {
+		this.group = group;
+	}
+
+    public Set<Trajectory> getNearTrajectories() {
+	    if(nearTrajectories == null) nearTrajectories = new HashSet<>();
+        return nearTrajectories;
+    }
+
+    public int getGroupSize() {
+	    if(this.getGroup() == null) {
+	        return 0;
+        } else {
+	        return this.getGroup().getTrajectories().size();
+        }
+    }
+
+    /**
 	 * Sort points by timestamp
 	 */
 	@Override
@@ -180,6 +214,7 @@ public class Trajectory implements Serializable, ITrajectory<Point> {
 					p.setLat(prev.getLat() + ((latRange / qtde) * n));
 					p.setLng(prev.getLng() + ((lngRange / qtde) * n));
 					p.setTimestamp(prev.getTimestamp() + ((long) ((timeRange / qtde) * n)));
+					p.setTrajectory(this);
 					this.getPoints().add(i + n, p);
 				}
 				pointSize = this.getPoints().size();
@@ -262,7 +297,6 @@ public class Trajectory implements Serializable, ITrajectory<Point> {
 		}
 		return null;
 	}
-	
 
 	/**
 	 * Return if the angle size is less than a threshold
@@ -293,5 +327,5 @@ public class Trajectory implements Serializable, ITrajectory<Point> {
 			return true;
 		}
 	}
-		
+
 }
