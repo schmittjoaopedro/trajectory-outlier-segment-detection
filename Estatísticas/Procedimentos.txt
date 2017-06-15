@@ -1,0 +1,6 @@
+Comparação:
+
+0. Tempo de recuperação das trajetórias da base de dados pela quantidade de pontos
+1. Quantidade de trajetórias padrões pelo tempo de execução.
+2. Quantidade de trajetórias não padrões pelo tempo de execução.
+3. Quantidade de pontos nas trajetórias pelo tempo de execução.

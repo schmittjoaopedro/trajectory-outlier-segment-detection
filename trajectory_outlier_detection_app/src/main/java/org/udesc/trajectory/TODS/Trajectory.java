@@ -238,7 +238,7 @@ public class Trajectory implements Serializable, ITrajectory<Point> {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Execute binary search to find the first near point for a given point p
 	 * 

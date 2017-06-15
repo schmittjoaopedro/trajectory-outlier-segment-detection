@@ -16,7 +16,7 @@ public class TODSv3Test {
     private static List<Grid> regions;
     private static double L = 30.0;
     private static TODSv2 todSv2;
-    private static TODS tods;
+//    private static TODS tods;
 
     //	Joinville
 //    private static double latSt = -26.370924;
@@ -26,7 +26,7 @@ public class TODSv3Test {
 //    private static String country = "Brazil";
 //    private static String state = "SC";
 //    private static String city = "Joinville";
-//    private static String outputFile = "/home/joao/Área de Trabalho/Mestrado/Estatísticas/statistics_bra2.csv";
+//    private static String outputFile = "/home/joao/Área de Trabalho/Mestrado/Estatísticas/statistics_bra_final.csv";
 //    private static String inputFile  = "/home/joao/Área de Trabalho/Mestrado/Estatísticas/brasil_best.csv";
 
 //	San Francisco
@@ -37,38 +37,79 @@ public class TODSv3Test {
 	private static String country = "EUA";
 	private static String state = "CA";
 	private static String city = "San Francisco";
-	private static String outputFile = "/home/joao/Área de Trabalho/Mestrado/Estatísticas/statistics_eua3.csv";
+	private static String outputFile = "/home/joao/Área de Trabalho/Mestrado/Estatísticas/statistics_eua_final.csv";
 	private static String inputFile  = "/home/joao/Área de Trabalho/Mestrado/Estatísticas/eua_best.csv";
 
     private static String outputFolder = "/home/joao/Área de Trabalho/Mestrado/output/TODSv2/Joinville";
 
     public static void main(String[] args) throws Exception {
 
-        regions =  createGrid();
 
         todSv2 = new TODSv2();
-        tods = new TODS();
-
-        FileUtils.write(new File(outputFile), "R1,R2,QT,CT,GT,STDT,SEGT,MEM,STD,NSTD,STDSEG,NOTSTDSEG,PTQTDALL,PTQTDEPR\n", "UTF-8", true);
+//        tods = new TODS();
+        //FileUtils.write(new File(outputFile), "R1,R2,QT,CT,GT,STDT,SEGT,MEM,STD,NSTD,STDSEG,NOTSTDSEG,PTQTDALL,PTQTDEPR\n", "UTF-8", true);
         /*for(int i = 1; i < 100; i++) {
             loadTest(116,419,i);
-            loadTest(195,199,i);
-            loadTest(380,445,i);
-            loadTest(410,620,i);
-            loadTest(471,595,i);
-            loadTest(561,596,i);
-            loadTest(824,828,i);
-            loadTest(553,527,i);
-            loadTest(626,599,i);
-            loadTest(650,588,i);
-            loadTest(742,621,i);
         }*/
-        int regions[][] = readRegions();
-        for(int i = 0; i < regions.length; i++) {
-            executeProgram(regions[i][0], regions[i][1]);
+
+        //BRA -> nível 0 -> 500 exec -> 1 - 0
+        //BRA -> nível 1 -> 500 exec -> 1 - 0
+        //BRA -> nível 5 -> 500 exec -> 1 - 0
+        //BRA -> nível 8 -> 500 exec -> 1 - 0
+        //EUA -> nível 0 -> 500 exec -> 1 - 0
+        //EUA -> nível 1 -> 500 exec -> 1 - 0
+        //EUA -> nível 5 -> 500 exec -> 1 - 0
+        //EUA -> nível 8 -> 500 exec -> 1 - 0
+        int total = 0;
+
+        regions =  createGrid();
+        attachGrid(8);
+        int regionsV[][] = readRegions();
+        for(int i = 0; i < regionsV.length; i++) {
+            if(total++ == 500) break;
+            executeProgram(regionsV[i][1], regionsV[i][0]);
+            System.out.println(total);
         }
 
+    }
 
+    private static void attachGrid(int level) {
+        for(int i = 0; i < regions.size(); i++) {
+            Grid current = regions.get(i);
+            if(i + level >= regions.size()) {
+                level = regions.size() - 1;
+            }
+            Grid endRegion = regions.get(i + level);
+            current.setLatMax(endRegion.getLatMax());
+            current.setLngMax(endRegion.getLngMax());
+            for(int j = 0; j < level; j++) {
+                regions.set(i + j, current);
+            }
+            i = i + level;
+        }
+    }
+
+    public static List<Trajectory> getTrajectories(List<Trajectory> trajectoriesDB) {
+        List<Trajectory> trajectories = new ArrayList<>();
+        for(Trajectory t : trajectoriesDB) {
+            Trajectory nT = new Trajectory();
+            nT.setCity(t.getCity());
+            nT.setCountry(t.getCountry());
+            nT.setName(t.getName());
+            nT.setStartHour(t.getStartHour());
+            nT.setStartMinute(t.getStartMinute());
+            nT.setState(t.getState());
+            for(Point p : t.getPoints()) {
+                Point nP = new Point();
+                nP.setLat(p.getLat());
+                nP.setLng(p.getLng());
+                nP.setStandard(false);
+                nP.setTimestamp(p.getTimestamp());
+                nT.getPoints().add(nP);
+            }
+            trajectories.add(nT);
+        }
+        return trajectories;
     }
 
     public static void loadTest(int i, int j, int sample) throws Exception {
@@ -120,10 +161,10 @@ public class TODSv3Test {
         request.setStartGrid(regions.get(i));
         request.setEndGrid(regions.get(j));
         TODSResult result = null;
-        if(type.equals("TODSv2"))
+//        if(type.equals("TODSv2"))
             result = todSv2.run(request);
-        else
-            result = tods.run(request);
+//        else
+//            result = tods.run(request);
         System.out.println(i + "\t" + j);
         if(!result.getNotStandards().isEmpty() && register) {
             printData(regions.get(i), regions.get(j), i, j, result, type);
@@ -246,52 +287,54 @@ public class TODSv3Test {
         request.setEndGrid(regions.get(j));
         TODSResult result = todSv2.run(request);
 
-        int countStd = 0;
-        int countNotStd = 0;
-        int nStd = 0;
-        int std = 0;
-        long pointQtdeAll = 0;
-        long pointQtdeProcessed = 0;
+        if(!result.getNotStandards().isEmpty()) {
+            int countStd = 0;
+            int countNotStd = 0;
+            int nStd = 0;
+            int std = 0;
+            long pointQtdeAll = 0;
+            long pointQtdeProcessed = 0;
 
-        for(Group group : result.getStandards()) {
-            countStd += group.getTrajectories().size();
-            for(Trajectory t : group.getTrajectories()) {
-                pointQtdeProcessed += t.getPoints().size();
+            for(Group group : result.getStandards()) {
+                countStd += group.getTrajectories().size();
+                for(Trajectory t : group.getTrajectories()) {
+                    pointQtdeProcessed += t.getPoints().size();
+                }
             }
-        }
-        for(Group group : result.getNotStandards()) {
-            countNotStd += group.getTrajectories().size();
-            for(Route route : group.getRoutes()) {
-                std += route.getStandards().size();
-                nStd += route.getNotStandards().size();
+            for(Group group : result.getNotStandards()) {
+                countNotStd += group.getTrajectories().size();
+                for(Route route : group.getRoutes()) {
+                    std += route.getStandards().size();
+                    nStd += route.getNotStandards().size();
+                }
+                for(Trajectory t : group.getTrajectories()) {
+                    pointQtdeProcessed += t.getPoints().size();
+                }
             }
-            for(Trajectory t : group.getTrajectories()) {
-                pointQtdeProcessed += t.getPoints().size();
+            for(Trajectory t : result.getRawResult()) {
+                pointQtdeAll += t.getPoints().size();
             }
-        }
-        for(Trajectory t : result.getRawResult()) {
-            pointQtdeAll += t.getPoints().size();
-        }
-        if(j % 100 == 0) {
-            System.out.println(i + "\t" + j);
-        }
-        if(countStd > 0) {
-            String data = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
-                    i,
-                    j,
-                    result.getQueryTime(),
-                    result.getCandidateTime(),
-                    result.getGroupTime(),
-                    result.getStandardTime(),
-                    result.getSegmentationTime(),
-                    (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()),
-                    countStd,
-                    countNotStd,
-                    std,
-                    nStd,
-                    result.getPointsTotal(),
-                    pointQtdeProcessed);
-            FileUtils.write(new File(outputFile), data, "UTF-8", true);
+            if(j % 100 == 0) {
+                System.out.println(i + "\t" + j);
+            }
+            if(countStd > 0) {
+                String data = String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+                        i,
+                        j,
+                        result.getQueryTime(),
+                        result.getCandidateTime(),
+                        result.getGroupTime(),
+                        result.getStandardTime(),
+                        result.getSegmentationTime(),
+                        (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()),
+                        countStd,
+                        countNotStd,
+                        std,
+                        nStd,
+                        result.getPointsTotal(),
+                        pointQtdeProcessed);
+                FileUtils.write(new File(outputFile), data, "UTF-8", true);
+            }
         }
     }
 

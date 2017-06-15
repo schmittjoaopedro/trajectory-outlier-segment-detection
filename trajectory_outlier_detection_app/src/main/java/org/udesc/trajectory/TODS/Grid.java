@@ -1,10 +1,7 @@
 package org.udesc.trajectory.TODS;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.udesc.database.IGrid;
 
@@ -98,5 +95,29 @@ public class Grid implements Serializable, IGrid {
 		}
 		return groups;
 	}
+
+    @Override
+    public String toString() {
+        return drawPolyline(Arrays.asList(
+                new Point(this.getLatMin(), this.getLngMin(), null),
+                new Point(this.getLatMin(), this.getLngMax(), null),
+                new Point(this.getLatMax(), this.getLngMax(), null),
+                new Point(this.getLatMax(), this.getLngMin(), null),
+                new Point(this.getLatMin(), this.getLngMin(), null)
+        ), "FFFFFF");
+    }
+
+    public String drawPolyline(List<Point> points, String color) {
+        StringBuilder data = new StringBuilder();
+        data.append("\ndrawPoints([");
+        for(int i = 0; i < points.size(); i++) {
+            data.append("{lat: " + points.get(i).getLat() + ",lng:" + points.get(i).getLng() + "}");
+            if(i < points.size() - 1) {
+                data.append(",");
+            }
+        }
+        data.append("], '#" + color + "');");
+        return data.toString();
+    }
 
 }

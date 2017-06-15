@@ -83,17 +83,24 @@ public class TODSv2 {
         return trajs;
     }
 
+
 	
 	@SuppressWarnings("unchecked")
 	public TODSResult run(TODSRequest request) throws Exception {
-		
-		//######### Database search ##########
-		TODSResult calculationResult = new TODSResult();
-		Long time = System.nanoTime();
-		List<Trajectory> candidates = (List<Trajectory>) trajectoryBase.findTrajectories(request.getCountry(), request.getState(), request.getCity(), request.getStartHour(), request.getEndHour(), request.getStartGrid(), request.getEndGrid(), Trajectory.class, Point.class);
-		calculationResult.setQueryTime(System.nanoTime() - time);
+
+        //######### Database search ##########
+        Long time = System.nanoTime();
+        List<Trajectory> candidates = (List<Trajectory>) trajectoryBase.findTrajectories(request.getCountry(), request.getState(), request.getCity(), request.getStartHour(), request.getEndHour(), request.getStartGrid(), request.getEndGrid(), Trajectory.class, Point.class);
+        long endTime = System.nanoTime() - time;
+        TODSResult result = this.run(request, candidates);
+        result.setQueryTime(endTime);
+        return result;
+    }
+
+    public TODSResult run(TODSRequest request, List<Trajectory> candidates) throws Exception {
+        TODSResult calculationResult = new TODSResult();
         //######### Filter processing and interpolation #########
-		time = System.nanoTime();
+		Long time = System.nanoTime();
 		long pts = 0;
 		for(Trajectory trajectory : candidates) {
 		    pts += trajectory.getPoints().size();
@@ -106,6 +113,7 @@ public class TODSv2 {
 				return (int) (o1.getPoints().size() - o2.getPoints().size());
 			}
 		});
+		if(candidates.isEmpty()) return calculationResult;
         IndexManager indexManager = new IndexManager(candidates, request.getDistance());
         calculationResult.setPointsTotal(pts);
 		calculationResult.setCandidateTime(System.nanoTime() - time);
@@ -211,7 +219,10 @@ public class TODSv2 {
 				return (int) (o2.getTrajectories().size() - o1.getTrajectories().size());
 			}
 		});
-    	return groups.subList(0, k);
+        for (Group group : groups) {
+            group.createIndex();
+        }
+        return groups.subList(0, k);
     }
 	
 	public List<Group> processNotStandardTrajectories(List<Group> GT, List<Group> STG, double distance, double angle) {
