@@ -1,6 +1,6 @@
 library(dplyr)
 
-setwd("/home/joao/Área de Trabalho/Mestrado/Estatísticas")
+setwd("/home/joao/Área de Trabalho/Mestrado/GIT/trajectory-outlier-segment-detection/Estatísticas_last")
 data <- read.csv("statistics_bra_final.csv")
 data <- rbind(data, read.csv("statistics_eua_final.csv"));
 
@@ -32,7 +32,7 @@ if(tPlot) {
     title("B) Average time by number of coordinates", cex.main = 2)
 }
 
-if(bpPlot == true) {
+if(bpPlot == TRUE) {
     temp <- data.frame(y = data$TOTT, x = data$PTQTDEPR)
     temp <- temp[order(temp$x),]
     options(scipen=5)
@@ -44,7 +44,7 @@ if(bpPlot == true) {
     title("A) Number of analyzes vs number of trajectories", cex.main = 2)
     text(x = bp, y = temp$y, label = temp$y, pos = 3, cex = 2, col = "black")
 }
-if(bpPlot2 == true) {
+if(bpPlot2 == TRUE) {
     temp <- data.frame(x = data$PTQTDEPR, y1 = data$CT, y2 = data$GT, y3 = data$STDT, y4 = data$SEGT)
     temp$y1 <- temp$y1 / 10^9
     temp$y2 <- temp$y2 / 10^9

@@ -1,4 +1,4 @@
-jpeg(file="all_plots.jpeg", width = 8, height = 8, units = "in", res = 400)
+#jpeg(file="all_plots.jpeg", width = 8, height = 8, units = "in", res = 400)
 
 dataBR <- read.csv("statistics_bra.csv")
 dataUS <- read.csv("statistics_eua.csv")
@@ -101,4 +101,4 @@ glm1 = glm(temp$y ~ temp$t, family = "poisson")
 lines(temp$t, glm1$fitted.values, col = "blue", lwd = 3)
 title(main = "Tempo por pontos - San Francisco (USA)")
 
-dev.off()
+#dev.off()
